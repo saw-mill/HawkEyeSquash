@@ -11,24 +11,20 @@ filenames = glob.glob("Dataset/*.jpg")
 filenames.sort()
 frameList = [cv2.imread(frame) for frame in filenames]
 
-for i in range(len(frameList)-2):
+for i in range(len(frameList)-1):
 	# cv2.imshow("Frame {}".format(i),frameList[i])
 	previousFrame= frameList[i]
 	currFrame= frameList[i+1]
-	nextFrame= frameList[i+2]
 
 	previousFrameFiltered= cv2.medianBlur(previousFrame,7)
 	currFrameFiltered= cv2.medianBlur(currFrame,7)
-	nextFrameFiltered= cv2.medianBlur(nextFrame,7)
 
 	previousFrameGray= cv2.cvtColor(previousFrameFiltered,cv2.COLOR_BGR2GRAY)
 	currFrameGray= cv2.cvtColor(currFrameFiltered,cv2.COLOR_BGR2GRAY)
-	nextFrameGray= cv2.cvtColor(nextFrameFiltered,cv2.COLOR_BGR2GRAY)
-	# cv2.imshow('GreyScale versions',np.hstack([image3Gray,image4Gray]))
-	frame_diff_curr_previous= cv2.absdiff(previousFrameGray,currFrameGray)
-	frame_diff_next_curr= cv2.absdiff(currFrameGray,nextFrameGray)
 
-	bitwiseAndFramDiff= cv2.bitwise_and(frame_diff_curr_previous,frame_diff_next_curr)
+	frame_diff_curr_previous= cv2.absdiff(previousFrameGray,currFrameGray)
+
+	bitwiseAndFramDiff= cv2.bitwise_and(frame_diff_curr_previous,previousFrameGray)
 
 # startTimeImageDifferencing= time.time()
 # (score, image_diff) =compare_ssim(image3Gray,image4Gray,full=True)
