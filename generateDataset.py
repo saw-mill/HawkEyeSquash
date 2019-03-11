@@ -2,7 +2,7 @@ import numpy as np
 import argparse
 import cv2
 
-videoCapture = cv2.VideoCapture('SquashRally2_EDIT.mp4')
+videoCapture = cv2.VideoCapture('SRally3.mp4')
 
 totalFrames = videoCapture.get(cv2.CAP_PROP_FRAME_COUNT)
 print(totalFrames)
@@ -16,7 +16,7 @@ while(videoCapture.isOpened()):
     retValue, frame = videoCapture.read()
     if retValue == True:
         # cv2.imshow('Frame',frame) 
-        cv2.imwrite("Dataset/%d.jpg" % count,frame)
+        cv2.imwrite("Dataset2/%d.jpg" % count,frame)
         count=count+1
 
         if cv2.waitKey(1000) & 0xFF == ord('x'):
