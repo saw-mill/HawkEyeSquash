@@ -8,7 +8,7 @@ from ballDetection import filterSize, drawRectangle
 
 startTimeReadingFrames = time.time()
 # Location of dataset
-filenames = glob.glob("Dataset1/*.jpg")
+filenames = glob.glob("Dataset2/*.jpg")
 # filenames = glob.glob("Testing/*.jpg")
 
 # Reading each frame and storing it in a list
@@ -73,9 +73,9 @@ while i < (len(frameList)-2):
             cY = int(M["m01"] / M["m00"])
         else:
             continue
-        area = cv2.contourArea(cnt)
-        if area > max_area or area < min_area:
-            continue
+        area = round(cv2.contourArea(cnt),3)
+        # if area > max_area or area < min_area:
+        #     continue
         x,y,w,h=cv2.boundingRect(cnt)
         rectArea=w*h
         degOfCompactness=float(area)/rectArea
@@ -95,34 +95,34 @@ while i < (len(frameList)-2):
         candidates.append((cX, cY, area, perimeter))
         # cv2.ellipse(currFrame,ellipse,(0,255,0),2)
         cv2.drawContours(currFrame, [cnt], -1, (0, 0, 255), 1)
-        cv2.putText(currFrame, str(cX)+","+str(cY), (cX, cY),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+        cv2.putText(currFrame, str(area), (cX, cY),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 0), 2)
         cv2.imshow('Candidate image', currFrame)
         # cv2.imshow('Final image {}'.format(i),threshFrameDifferencing)
     print(len(candidates))
 
-    for cnt in contours1:
-	    M = cv2.moments(cnt)
-	    if M["m00"] != 0:
-		    cX = int(M["m10"] / M["m00"])
-		    cY = int(M["m01"] / M["m00"])
-	    else:
-		    continue
-	    area = cv2.contourArea(cnt)
-	    # if area > max_area or area < min_area:
-		#     continue
-	    x,y,w,h=cv2.boundingRect(cnt)
-	    rectArea=w*h
-	    degOfCompactness=float(area)/rectArea
-	    perimeter = cv2.arcLength(cnt, True)
-	    candidates.append((cX, cY, area, perimeter))
-		# cv2.ellipse(currFrame,ellipse,(0,255,0),2)
-	    cv2.drawContours(currFrame, [cnt], -1, (0, 0, 255), 1)
-	    cv2.putText(currFrame, str(cX)+","+str(cY), (cX, cY),
-					cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2)
-	    cv2.imshow('Candidate image', currFrame)
-		# cv2.imshow('Final image {}'.format(i),threshFrameDifferencing)
-    print(len(candidates))
+    # for cnt in contours1:
+	#     M = cv2.moments(cnt)
+	#     if M["m00"] != 0:
+	# 	    cX = int(M["m10"] / M["m00"])
+	# 	    cY = int(M["m01"] / M["m00"])
+	#     else:
+	# 	    continue
+	#     area = round(cv2.contourArea(cnt),3)
+    #     # if area > max_area or area < min_area:
+	# 	#     continue
+	#     x,y,w,h=cv2.boundingRect(cnt)
+	#     rectArea=w*h
+	#     degOfCompactness=float(area)/rectArea
+	#     perimeter = cv2.arcLength(cnt, True)
+	#     candidates.append((cX, cY, area, perimeter))
+	# 	# cv2.ellipse(currFrame,ellipse,(0,255,0),2)
+	#     cv2.drawContours(currFrame, [cnt], -1, (0, 0, 255), 1)
+	#     cv2.putText(currFrame, str(area), (cX, cY),
+	# 				cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2)
+	#     cv2.imshow('Candidate image', currFrame)
+	# 	# cv2.imshow('Final image {}'.format(i),threshFrameDifferencing)
+    # print(len(candidates))
 
     
 
