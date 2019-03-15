@@ -1,3 +1,4 @@
 {
-    "python.pythonPath": "/home/sawmill/.virtualenvs/py3cv4/bin/python"
+    "python.pythonPath": "/home/sawmill/.virtualenvs/py3cv4/bin/python",
+    "python.formatting.provider": "autopep8"
 }

@@ -3,7 +3,7 @@ import time
 import cv2
 import math
 from foregroundExtraction import readyFrame, frameDifferencing, morphologicalOperations, natural_sort
-from ballDetection import findContours, sizeDetection, playerProximityDetection, regionDetection
+from ballDetection import findContours, sizeDetection, playerProximityDetection
 
 startTimeReadingFrames = time.time()
 # Location of dataset
@@ -17,7 +17,9 @@ print("Reading Frames--- %s seconds ---" %
 
 startTimeForeGroundExtraction = time.time()
 # Parsing through the frames
+
 ballCandidatesPreviousFrame = list()
+
 i = 0
 while i < (len(frameList)-2):
     # cv2.imshow("Frame {}".format(i),frameList[i])
@@ -56,15 +58,39 @@ while i < (len(frameList)-2):
     
     ballCandidatesFiltered = playerProximityDetection(ballCandidates, playerCadidates, incompletePlayerCandidates, currFrame)
 
-    ballCandidatesFilteredProximity, ballCandidatesPreviousFrame =regionDetection(ballCandidatesFiltered,ballCandidatesPreviousFrame,currFrame)
-    
-    for cand in ballCandidatesFilteredProximity:
-        if not cand:
-            cv2.imshow('Candidate image', currFrame)
-        else:
-            cv2.drawContours(currFrame, [cand[3]], -1, (255, 0,), 2)
-            cv2.imshow('Candidate image', currFrame)
+    # for cand in ballCandidatesFiltered:
+    #     if cand is None:
+    #         cv2.imshow('Candidate image', currFrame)
+    #     else:
+    #         cv2.drawContours(currFrame, [cand[3]], -1, (255, 0,), 2)
+    #         cv2.imshow('Candidate image', currFrame)
+    ballCandidatesFilteredProximity = list()
 
+    if len(ballCandidatesPreviousFrame) > 0:
+        for cand in ballCandidatesFiltered:
+            ballCandFlag = False
+            for prevCand in ballCandidatesPreviousFrame:
+                dist = math.sqrt(math.pow((cand[0] - prevCand[0]), 2) + math.pow((cand[1] - prevCand[1]), 2))
+                if dist > 2 and dist < 70:
+                    ballCandFlag = True
+                else:
+                    continue
+            if ballCandFlag is True:
+                ballCandidatesFilteredProximity.append(cand)
+                cv2.putText(currFrame, "Maybe", (cand[0] + 1, cand[1] + 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 150, 192), 2)
+                cv2.drawContours(currFrame, [cand[3]], -1, (255, 0,), 2)
+                cv2.imshow('Candidate image', currFrame)
+            else:
+                cv2.putText(currFrame, "Not", (cand[0] + 1, cand[1] + 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 150, 192), 2)
+                cv2.imshow('Candidate image', currFrame)
+        ballCandidatesPreviousFrame = ballCandidatesFilteredProximity.copy()
+    else:
+        for cand in ballCandidatesFiltered:
+            cv2.drawContours(currFrame, [cand[3]], -1, (255, 0,), 2)
+            cv2.putText(currFrame, "Maybe", (cand[0] + 1, cand[1] + 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 150, 192), 2)
+            cv2.imshow('Candidate image', currFrame)
+        ballCandidatesPreviousFrame = ballCandidatesFiltered.copy()
+    
     i += 1  # increments the loop
 
     # Exits the loop when Esc is pressed, goes to previous frame when space pressed and goes to next frame when any other key is pressed
