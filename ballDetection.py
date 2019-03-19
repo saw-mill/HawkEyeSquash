@@ -43,13 +43,33 @@ def sizeDetection(contours, currFrame):
                         # cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
                 elif area < min_BallArea:
                         continue
-                
-        print("Ball Candidates: %d" % len(ballCandidates))
-        print("Player Candidates: %d" % len(playerCadidates))
-        print("Incomplete Player Candidate: %d" % len(incompletePlayerCandidates))
         endTimeSizeDetection = time.time()
         print("Size based filtering in--- %s seconds ---" %(endTimeSizeDetection-startTimeSizeDetection))
         return ballCandidates, playerCadidates, incompletePlayerCandidates
+
+def courtBoundaryDetection(ballCandidates, playerCadidates, incompletePlayerCandidates, currFrame):
+        ballCandidatesFilteredBoundary = list()
+        playerCadidatesFilteredBoundary = list()
+        incompletePlayerCandidatesFilteredBoundary = list()
+        for cand in ballCandidates:
+                if (cand[0] < 145 or cand[0] > 1085):
+                        continue
+                else:
+                        ballCandidatesFilteredBoundary.append(cand)
+        for playercand in playerCadidates:
+                if (playercand[0] < 145 or playercand[0] > 1085):
+                        continue
+                else:
+                        playerCadidatesFilteredBoundary.append(playercand)
+        for incompletecand in incompletePlayerCandidates:
+                if (incompletecand[0] < 145 or incompletecand[0] > 1085):
+                        continue
+                else:
+                        incompletePlayerCandidatesFilteredBoundary.append(incompletecand)
+        
+        print("Player Candidates: %d" % len(playerCadidatesFilteredBoundary))
+        print("Incomplete Player Candidate: %d" % len(incompletePlayerCandidatesFilteredBoundary))
+        return ballCandidatesFilteredBoundary,playerCadidatesFilteredBoundary,incompletePlayerCandidatesFilteredBoundary
 
 def playerProximityDetection(ballCandidates, playerCadidates, incompletePlayerCandidates, currFrame):
         startTimePlayerProximity = time.time()
@@ -118,6 +138,7 @@ def regionDetection(ballCandidatesFiltered, ballCandidatesPreviousFrame,currFram
                                 # cv2.drawContours(currFrame, [cand[3]], -1, (255, 0,), 2)
                                 # cv2.imshow('Candidate image', currFrame)
                         else:
+                                cv2.imshow('Candidate image', currFrame)
                                 continue
                                 # cv2.putText(currFrame, "Not", (cand[0] + 1, cand[1] + 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 150, 192), 2)
                                 # cv2.imshow('Candidate image', currFrame)
@@ -131,4 +152,5 @@ def regionDetection(ballCandidatesFiltered, ballCandidatesPreviousFrame,currFram
                 ballCandidatesPreviousFrame = ballCandidatesFiltered.copy()
         endTimeRegionDetection = time.time()
         print("Expected Region based filtering in--- %s seconds ---" % (endTimeRegionDetection - startTimeRegionDetection))
+        print("Ball Candidates: %d" % len(ballCandidatesFilteredProximity))
         return ballCandidatesFilteredProximity, ballCandidatesPreviousFrame
