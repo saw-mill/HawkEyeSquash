@@ -2,8 +2,8 @@ import glob
 import time
 import cv2
 import math
-from foregroundExtraction import readyFrame, frameDifferencing, morphologicalOperations, natural_sort
-from ballDetection import findContours, sizeDetection, playerProximityDetection
+from Modules.foregroundExtraction import readyFrame, frameDifferencing, morphologicalOperations, natural_sort
+from Modules.ballDetection import findContours, sizeDetection, playerProximityDetection
 
 startTimeReadingFrames = time.time()
 # Location of dataset
@@ -77,7 +77,7 @@ while i < (len(frameList)-2):
                     continue
             if ballCandFlag is True:
                 ballCandidatesFilteredProximity.append(cand)
-                cv2.putText(currFrame, "Maybe", (cand[0] + 1, cand[1] + 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 150, 192), 2)
+                cv2.putText(currFrame, "Candidate", (cand[0] + 1, cand[1] + 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 150, 192), 2)
                 cv2.drawContours(currFrame, [cand[3]], -1, (255, 0,), 2)
                 cv2.imshow('Candidate image', currFrame)
             else:
@@ -87,7 +87,7 @@ while i < (len(frameList)-2):
     else:
         for cand in ballCandidatesFiltered:
             cv2.drawContours(currFrame, [cand[3]], -1, (255, 0,), 2)
-            cv2.putText(currFrame, "Maybe", (cand[0] + 1, cand[1] + 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 150, 192), 2)
+            cv2.putText(currFrame, "Candidate", (cand[0] + 1, cand[1] + 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 150, 192), 2)
             cv2.imshow('Candidate image', currFrame)
         ballCandidatesPreviousFrame = ballCandidatesFiltered.copy()
     

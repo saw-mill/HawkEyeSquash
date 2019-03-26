@@ -1,12 +1,11 @@
 import glob
 import time
 import cv2
-from foregroundExtraction import readyFrame, frameDifferencing, morphologicalOperations, natural_sort
-from ballDetection import filterSize, drawRectangle
+from Modules.foregroundExtraction import readyFrame, frameDifferencing, morphologicalOperations, natural_sort
 
 startTimeReadingFrames = time.time()
 # Location of dataset
-filenames = glob.glob("Dataset1/*.jpg")
+filenames = glob.glob("Dataset2/*.jpg")
 # filenames = glob.glob("Testing/*.jpg")
 
 # Reading each frame and storing it in a list

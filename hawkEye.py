@@ -2,8 +2,8 @@ import glob
 import time
 import cv2
 import math
-from foregroundExtraction import readyFrame, frameDifferencing, morphologicalOperations, natural_sort
-from ballDetection import findContours, sizeDetection, playerProximityDetection, regionDetection, courtBoundaryDetection
+from Modules.foregroundExtraction import readyFrame, frameDifferencing, morphologicalOperations, natural_sort
+from Modules.ballDetection import findContours, sizeDetection, playerProximityDetection, regionDetection, courtBoundaryDetection
 
 startTimeReadingFrames = time.time()
 datasetName= "Dataset2"

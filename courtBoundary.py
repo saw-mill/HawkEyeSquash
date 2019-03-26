@@ -6,7 +6,7 @@ from Modules.foregroundExtraction import readyFrame, frameDifferencing, morpholo
 from Modules.ballDetection import findContours, sizeDetection, playerProximityDetection, regionDetection, courtBoundaryDetection
 
 startTimeReadingFrames = time.time()
-datasetName= "Dataset1"
+datasetName= "Dataset2"
 # Location of dataset
 filenames = glob.glob(datasetName+"/*.jpg")
 
@@ -43,14 +43,14 @@ while i < (len(frameList)-2):
         previousFrameGray, currFrameGray, nextFrameGray)
 
     # Performing morphological operations
-    final_image = morphologicalOperations(threshFrameDifferencing, 4, 4)
+    img_erosion = morphologicalOperations(threshFrameDifferencing, 4, 4)
 
     startTimeBlurringBinary = time.time()
     # Blurring the binary image to get smooth shapes of objects
-    # final_image = cv2.medianBlur(img_erosion, 7)
-    # endTimeBlurringBinary = time.time()
-    # print("Final Blur--- %s seconds ---" %
-    #       (endTimeBlurringBinary - startTimeBlurringBinary))
+    final_image = cv2.medianBlur(img_erosion, 7)
+    endTimeBlurringBinary = time.time()
+    print("Final Blur--- %s seconds ---" %
+          (endTimeBlurringBinary - startTimeBlurringBinary))
 
     endTimeForegroundExtraction=time.time()
     print("Foreground Extraction--- %s seconds ---" % (endTimeForegroundExtraction - startTimeForeGroundExtraction))
@@ -71,21 +71,29 @@ while i < (len(frameList)-2):
     # Separating candidates based on size
     ballCandidates, playerCadidates, incompletePlayerCandidates = sizeDetection(contours, currFrame)
 
-    # Removing candidates outside the Court Boundary in Dataset2 
-    if (datasetName == 'Dataset2'):
-        ballCandidates, playerCadidates, incompletePlayerCandidates = courtBoundaryDetection(ballCandidates,playerCadidates,incompletePlayerCandidates,currFrame)
+    ballCandidatesFilteredBoundary = list()
+    playerCadidatesFilteredBoundary = list()
+    incompletePlayerCandidatesFilteredBoundary = list()
+    for cand in ballCandidates:
+            if (cand[0] < 145 or cand[0] > 1085):
+                    continue
+            else:
+                    ballCandidatesFilteredBoundary.append(cand)
+    for playercand in playerCadidates:
+            if (playercand[0] < 145 or playercand[0] > 1085):
+                    continue
+            else:
+                    playerCadidatesFilteredBoundary.append(playercand)
+    for incompletecand in incompletePlayerCandidates:
+            if (incompletecand[0] < 145 or incompletecand[0] > 1085):
+                    continue
+            else:
+                    incompletePlayerCandidatesFilteredBoundary.append(incompletecand)
     
-    # Removing Candidates that are close to the Players
-    ballCandidatesFiltered = playerProximityDetection(ballCandidates, playerCadidates, incompletePlayerCandidates, currFrame)
+    print("Player Candidates: %d" % len(playerCadidatesFilteredBoundary))
+    print("Incomplete Player Candidate: %d" % len(incompletePlayerCandidatesFilteredBoundary))
 
-    # Removing candidates that are not in their expected region after motion
-    ballCandidatesFilteredProximity, ballCandidatesPreviousFrame =regionDetection(ballCandidatesFiltered,ballCandidatesPreviousFrame,currFrame)
-    
-    endTimeBallDetection = time.time()
-    print("Ball Detection--- %s seconds ---" % (endTimeBallDetection - startTimeBallDetection))
-
-    # Drawing and Displaying contours around the candidates 
-    for cand in ballCandidatesFilteredProximity:
+    for cand in ballCandidatesFilteredBoundary:
         if not cand:
             cv2.imshow('Candidate image', currFrame)
         else:

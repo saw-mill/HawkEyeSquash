@@ -2,7 +2,7 @@ import glob
 import time
 import cv2
 import math
-from foregroundExtraction import readyFrame, frameDifferencing, morphologicalOperations, natural_sort
+from Modules.foregroundExtraction import readyFrame, frameDifferencing, morphologicalOperations, natural_sort
 
 startTimeReadingFrames = time.time()
 # Location of dataset

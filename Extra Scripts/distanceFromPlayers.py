@@ -2,8 +2,7 @@ import glob
 import time
 import cv2
 from scipy.spatial import distance
-from foregroundExtraction import readyFrame, frameDifferencing, morphologicalOperations, natural_sort
-from ballDetection import filterSize, drawRectangle
+from Modules.foregroundExtraction import readyFrame, frameDifferencing, morphologicalOperations, natural_sort
 
 startTimeReadingFrames = time.time()
 # Location of dataset
