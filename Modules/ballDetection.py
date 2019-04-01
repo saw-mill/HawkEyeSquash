@@ -13,7 +13,7 @@ def findContours(inputFrame):
         print("Contours found in--- %s seconds ---" %(endTimeFindingContours-startTimeFindingContours))
         return contours, hier
 
-def sizeDetection(contours, currFrame):
+def sizeDetection(contours, currFrame,frameNumber):
         startTimeSizeDetection = time.time()
         min_BallArea = 300
         max_BallArea = 1500
@@ -33,11 +33,11 @@ def sizeDetection(contours, currFrame):
                         continue
                 area = cv2.contourArea(cnt)
                 if area > min_PlayerArea:
-                        playerCadidates.append([cX, cY, area, cnt])
+                        playerCadidates.append([cX, cY, area, cnt,frameNumber])
                 elif area > min_IncompletePlayerArea and area < min_PlayerArea:
-                        incompletePlayerCandidates.append([cX, cY, area, cnt])
+                        incompletePlayerCandidates.append([cX, cY, area, cnt,frameNumber])
                 elif area < max_BallArea and area > min_BallArea:
-                        ballCandidates.append([cX, cY, area, cnt])
+                        ballCandidates.append([cX, cY, area, cnt,frameNumber])
                         # cv2.drawContours(currFrame, [cnt], -1, (0, 255, 0), 1)
                         # cv2.putText(currFrame, str(area), (cX, cY),
                         # cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)

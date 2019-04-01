@@ -54,7 +54,7 @@ while i < (len(frameList)-2):
 
     contours, hier = findContours(final_image_copy)
 
-    ballCandidates, playerCadidates, incompletePlayerCandidates = sizeDetection(contours, currFrame)
+    ballCandidates, playerCadidates, incompletePlayerCandidates = sizeDetection(contours, currFrame,i)
     
     ballCandidatesFiltered = playerProximityDetection(ballCandidates, playerCadidates, incompletePlayerCandidates, currFrame)
 

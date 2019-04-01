@@ -69,7 +69,7 @@ while i < (len(frameList)-2):
     contours, hier = findContours(final_image_copy)
 
     # Separating candidates based on size
-    ballCandidates, playerCadidates, incompletePlayerCandidates = sizeDetection(contours, currFrame)
+    ballCandidates, playerCadidates, incompletePlayerCandidates = sizeDetection(contours, currFrame,i)
 
     # Removing candidates outside the Court Boundary in Dataset2 
     if (datasetName == 'Dataset2'):
