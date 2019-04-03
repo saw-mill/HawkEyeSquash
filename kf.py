@@ -27,6 +27,7 @@ kalman = cv2.KalmanFilter(4,2)
 kalman.measurementMatrix = np.array([[1, 0, 0, 0], [0, 1, 0, 0]], np.float32)
 kalman.transitionMatrix = np.array([[1,0,1,0],[0,1,0,1],[0,0,1,0],[0,0,0,1]],np.float32)
 kalman.processNoiseCov = np.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]], np.float32) * 0.09
+kalman.measurementNoiseCov = np.array([[1,0],[0,1]],np.float32) * 0.00003
 i = 0
 while i < (len(frameList)-2):
     # cv2.imshow("Frame {}".format(i),frameList[i])
@@ -92,56 +93,53 @@ while i < (len(frameList)-2):
     
     endTimeBallDetection = time.time()
     print("Ball Detection--- %s seconds ---" % (endTimeBallDetection - startTimeBallDetection))
-    
-    # Drawing and Displaying contours around the candidates 
-    
-    if (len(ballCandidatesFilteredProximity) > 0):
-        for cand in ballCandidatesFilteredProximity:
-            if (i + 1 == 1):
-                x = cand[0]
-                y = cand[1]
-                mp = np.array([[np.float32(x)], [np.float32(y)]])
-                initstate = [mp[0], mp[1]]
-                tp[0] = initstate[0]
-                tp[1] = initstate[1]
-                pred.append((int(tp[0]), int(tp[1])))
-                print(tp)
-                print(mp)
-                cv2.drawContours(currFrame, [cand[3]], -1, (255, 0,), 2)
-                cv2.putText(currFrame, str(cand[0]) + "," + str(cand[1]), (cand[0] + 1, cand[1] + 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
-                cv2.circle(currFrame,(tp[0],tp[1]), 10, (0,0,255), -1)
-                cv2.putText(currFrame, str(tp[0])+","+str(tp[1]),(tp[0]+1, tp[1]+1),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
-                cv2.imshow('Candidate image', currFrame)
-            else:
-                x = cand[0]
-                y = cand[1]
-                x = x - initstate[0]
-                y = y - initstate[1]
-                mp = np.array([[np.float32(x)], [np.float32(y)]])
-                meas.append((x, y))
-                kalman.correct(mp)
-                tp = kalman.predict()
-                tp[0] = tp[0] + initstate[0]
-                tp[1] = tp[1] + initstate[1]
-                pred.append((int(tp[0]), int(tp[1])))
-                print(tp)
-                print(mp)
-                cv2.drawContours(currFrame, [cand[3]], -1, (255, 0,), 2)
-                cv2.putText(currFrame, str(cand[0]) + "," + str(cand[1]), (cand[0] + 1, cand[1] + 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
-                cv2.circle(currFrame,(tp[0],tp[1]), 10, (0,0,255), -1)
-                cv2.putText(currFrame, str(tp[0])+","+str(tp[1]),(tp[0]+1, tp[1]+1),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
-                cv2.imshow('Candidate image', currFrame)
+
+    if (i + 1 == 1):
+        x = ballCandidatesFilteredProximity[0][0]
+        y = ballCandidatesFilteredProximity[0][1]
+        mp = np.array([[np.float32(x)], [np.float32(y)]])
+        initstate = [mp[0], mp[1]]
+        tp[0] = initstate[0]
+        tp[1] = initstate[1]
+        pred.append((int(tp[0]), int(tp[1])))
+        cv2.circle(currFrame, (tp[0], tp[1]), 10, (0, 0, 255), -1)
     else:
         tp = kalman.predict()
         tp[0] = tp[0] + initstate[0]
         tp[1] = tp[1] + initstate[1]
         pred.append((int(tp[0]), int(tp[1])))
-        print(meas)
-        print(pred)
+        print("prediction: ")
+        print(tp)
         cv2.circle(currFrame,(tp[0],tp[1]), 10, (0,0,255), -1)
-        cv2.putText(currFrame, str(tp[0])+","+str(tp[1]),(tp[0]+1, tp[1]+1),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
-        cv2.imshow('Candidate image', currFrame)
+        cv2.putText(currFrame, str(tp[0]) + "," + str(tp[1]), (tp[0], tp[1]), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
 
+        if (len(ballCandidatesFilteredProximity) == 1):
+            for cand in ballCandidatesFilteredProximity:
+                x = cand[0]
+                y = cand[1]
+                x = x - initstate[0]
+                y = y - initstate[1]
+                mp = np.array([[np.float32(x)], [np.float32(y)]])
+                print("measurement: ")
+                print(mp)
+                meas.append((x, y))
+                kalman.correct(mp)
+                print("correction: ")
+                print(kalman.correct(mp))
+                cv2.drawContours(currFrame, [cand[3]], -1, (255, 0,), 2)
+                cv2.putText(currFrame, str(cand[0]) + "," + str(cand[1]), (cand[0] + 1, cand[1] + 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+                cv2.imshow('Candidate image', currFrame)
+
+        elif(len(ballCandidatesFilteredProximity) > 1):
+            print(meas)
+            for cand in ballCandidatesFilteredProximity:
+                cv2.drawContours(currFrame, [cand[3]], -1, (255, 0,), 2)
+                cv2.putText(currFrame, str(cand[0]) + "," + str(cand[1]), (cand[0] + 1, cand[1] + 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+                cv2.imshow('Candidate image', currFrame)
+        else:
+            print(meas)
+            cv2.imshow('Candidate image', currFrame)
+            
     i += 1  # increments the loop
 
     # Exits the loop when Esc is pressed, goes to previous frame when space pressed and goes to next frame when any other key is pressed
