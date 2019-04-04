@@ -105,7 +105,7 @@ while i < (len(frameList)-2):
             cv2.putText(currFrame, str(cand[0])+","+str(cand[1]),(cand[0]+1, cand[1]+1),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
             cv2.imshow('Candidate image', currFrame)
 
-    if (((i + 1) % 10) == 0):
+    if (((i + 1) % 194) == 0):
         print(dictFrameNumberscX)
 
         for data_dict in dictFrameNumberscX.items():
@@ -113,19 +113,35 @@ while i < (len(frameList)-2):
             x = data_dict[0]
             values = data_dict[1]
             for value in values:
+                # plt.subplot(1, 2, 1)
                 plt.scatter(x,value)
                 plt.xlabel('Frame Number')
                 plt.ylabel('Candidate X-Coordinate')
+                plt.title("Candidate Feature Image X-coordinate")
         # dictFrameNumberscX.clear()
         plt.show()
+
+        for data_dict in dictFrameNumberscY.items():
+            print(data_dict)
+            x = data_dict[0]
+            values = data_dict[1]
+            for value in values:
+                # plt.subplot(1, 2, 2)
+                plt.scatter(x,value)
+                plt.xlabel('Frame Number')
+                plt.ylabel('Candidate Y-Coordinate')
+                plt.title("Candidate Feature Image Y-coordinate")
+        # dictFrameNumberscX.clear()
+        plt.show()
+
     
     i += 1  # increments the loop
 
     # Exits the loop when Esc is pressed, goes to previous frame when space pressed and goes to next frame when any other key is pressed
-    k = cv2.waitKey(0)
-    if k == 27:
-        break
-    elif k == 32:
-        i -= 2
-    else:
-        continue
+    # k = cv2.waitKey(0)
+    # if k == 27:
+    #     break
+    # elif k == 32:
+    #     i -= 2
+    # else:
+    #     continue

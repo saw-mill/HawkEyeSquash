@@ -3,11 +3,12 @@ import time
 import cv2
 import math
 import numpy as np
+import matplotlib.pyplot as plt
 from Modules.foregroundExtraction import readyFrame, frameDifferencing, morphologicalOperations, natural_sort
 from Modules.ballDetection import findContours, sizeDetection, playerProximityDetection, regionDetection, courtBoundaryDetection
 
 startTimeReadingFrames = time.time()
-datasetName= "Dataset1"
+datasetName= "Dataset2"
 # Location of dataset
 filenames = glob.glob(datasetName+"/*.jpg")
 
@@ -18,6 +19,8 @@ print("Reading Frames--- %s seconds ---" %
       (endTimeReadingFrames - startTimeReadingFrames))
 
 # Parsing through the frames
+dictFrameNumberscX = {}
+dictFrameNumberscY = {}
 ballCandidatesPreviousFrame = list()
 meas=[]
 pred = []
@@ -105,6 +108,8 @@ while i < (len(frameList)-2):
         tp[1] = initstate[1]
         pred.append((int(tp[0]), int(tp[1])))
         cv2.circle(currFrame, (tp[0], tp[1]), 10, (0, 0, 255), -1)
+        dictFrameNumberscX[i + 1] = tp[0]
+        dictFrameNumberscY[i+1] = tp[1] 
     else:
         tp = kalman.predict()
         tp[0] = tp[0] + initstate[0]
@@ -135,8 +140,12 @@ while i < (len(frameList)-2):
                 distncePredAct = math.sqrt(math.pow((cand[0] - tp[0]), 2) + math.pow((cand[1] - tp[1]), 2))
                 if (distncePredAct < 50):
                     cv2.circle(currFrame, (corrected[0], corrected[1]), 10, (0, 255, 0), -1)
+                    dictFrameNumberscX[i + 1] = corrected[0]
+                    dictFrameNumberscY[i+1] = corrected[1]
                 else:
-                    cv2.circle(currFrame,(tp[0],tp[1]), 10, (0,0,255), -1)
+                    cv2.circle(currFrame, (tp[0], tp[1]), 10, (0, 0, 255), -1)
+                    dictFrameNumberscX[i + 1] = tp[0]
+                    dictFrameNumberscY[i+1] = tp[1]
                 # cv2.line(currFrame, (int(cand[0]), int(cand[1])), (int(tp[0]), int(tp[1])), (255, 0, 0), 2)
                 # xmidPoint = (cand[0]+tp[0])*0.5
                 # ymidPoint = (cand[1]+tp[1])*0.5
@@ -144,7 +153,7 @@ while i < (len(frameList)-2):
                 # ymidPoint)-30), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
                 cv2.drawContours(currFrame, [cand[3]], -1, (255, 0,), 2)
                 cv2.putText(currFrame, str(cand[0]) + "," + str(cand[1]), (cand[0] + 1, cand[1] + 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
-                cv2.imshow('Candidate image', currFrame)
+                # cv2.imshow('Candidate image', currFrame)
 
         elif(len(ballCandidatesFilteredProximity) > 1):
             print(meas)
@@ -163,6 +172,8 @@ while i < (len(frameList)-2):
 
             if (minDistObject == 1000):
                 cv2.circle(currFrame, (tp[0], tp[1]), 10, (0, 0, 255), -1)
+                dictFrameNumberscX[i + 1] = tp[0]
+                dictFrameNumberscY[i+1] = tp[1]
             else:
                 x = minDistXcoord
                 y = minDistYcoord
@@ -178,6 +189,8 @@ while i < (len(frameList)-2):
                 print("correction: ")
                 print(kalman.correct(mp))
                 cv2.circle(currFrame, (corrected[0], corrected[1]), 10, (0, 255, 0), -1)
+                dictFrameNumberscX[i + 1] = corrected[0]
+                dictFrameNumberscY[i+1] = corrected[1]
 
                 # cv2.line(currFrame, (int(cand[0]), int(cand[1])), (int(tp[0]), int(tp[1])), (255, 0, 0), 2)
                 # xmidPoint = (cand[0]+tp[0])*0.5
@@ -186,19 +199,50 @@ while i < (len(frameList)-2):
                 # ymidPoint)+r), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
                 cv2.drawContours(currFrame, [cand[3]], -1, (255, 0,), 2)
                 cv2.putText(currFrame, str(cand[0]) + "," + str(cand[1]), (cand[0] + 1, cand[1] + 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
-                cv2.imshow('Candidate image', currFrame)
+                # cv2.imshow('Candidate image', currFrame)
         else:
             print(meas)
-            cv2.circle(currFrame,(tp[0],tp[1]), 10, (0,0,255), -1)
-            cv2.imshow('Candidate image', currFrame)
+            cv2.circle(currFrame, (tp[0], tp[1]), 10, (0, 0, 255), -1)
+            dictFrameNumberscX[i + 1] = tp[0]
+            dictFrameNumberscY[i+1] = tp[1]
+            # cv2.imshow('Candidate image', currFrame)
 
+    if (((i + 1) % 194) == 0):
+        print(dictFrameNumberscX)
+        keys = dictFrameNumberscX.keys()
+        values = dictFrameNumberscX.values()
+        # plt.subplot(1, 2, 1)
+        plt.xlabel('Frame Number')
+        plt.ylabel('Candidate Kalman X-Coordinate')
+        plt.title('CFI with Kalman X Prediction')
+        plt.plot(keys, values, 'r--', linewidth=2)
+        plt.show()
+        print(dictFrameNumberscY)
+        keys = dictFrameNumberscY.keys()
+        values = dictFrameNumberscY.values()
+        # plt.subplot(1, 2, 2)
+        plt.xlabel('Frame Number')
+        plt.ylabel('Candidate Kalman Y-Coordinate')
+        plt.title('CFI with Kalman Y Prediction')
+        plt.plot(keys, values, 'g--', linewidth=2)
+        plt.show()
+
+        # for data_dict in dictFrameNumberscX.items():
+        #     print(data_dict)
+        #     x = data_dict[0]
+        #     value = data_dict[1]
+        #     plt.scatter(x,value)
+        #     plt.xlabel('Frame Number')
+        #     plt.ylabel('Candidate Kalman X-Coordinate')
+        # dictFrameNumberscX.clear()
+    
     i += 1  # increments the loop
 
     # Exits the loop when Esc is pressed, goes to previous frame when space pressed and goes to next frame when any other key is pressed
-    k = cv2.waitKey(0)
-    if k == 27:
-        break
-    elif k == 32:
-        i -= 2
-    else:
-        continue
+    # k = cv2.waitKey(0)
+    # if k == 27:
+    #     break
+    # elif k == 32:
+    #     i -= 2
+    # else:
+    #     continue
