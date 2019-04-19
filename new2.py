@@ -1,14 +1,12 @@
 import glob
 import time
 import cv2
-import math
 from Modules.foregroundExtraction import readyFrame, frameDifferencing, morphologicalOperations, natural_sort
-from Modules.ballDetection import findContours, sizeDetection, playerProximityDetection, regionDetection, courtBoundaryDetection
 
 startTimeReadingFrames = time.time()
-datasetName= "Dataset1"
 # Location of dataset
-filenames = glob.glob(datasetName+"/*.jpg")
+filenames = glob.glob("Dataset1/*.jpg")
+# filenames = glob.glob("Testing/*.jpg")
 
 # Reading each frame and storing it in a list
 frameList = [cv2.imread(frame) for frame in natural_sort(filenames)]
@@ -16,8 +14,9 @@ endTimeReadingFrames = time.time()
 print("Reading Frames--- %s seconds ---" %
       (endTimeReadingFrames - startTimeReadingFrames))
 
+startTimeForeGroundExtraction = time.time()
 # Parsing through the frames
-ballCandidatesPreviousFrame = list()
+
 i = 0
 while i < (len(frameList)-2):
     # cv2.imshow("Frame {}".format(i),frameList[i])
@@ -25,14 +24,9 @@ while i < (len(frameList)-2):
     # Storing three frames
     previousFrame = frameList[i]
     currFrame = frameList[i+1]
-    nextFrame = frameList[i+2]
-
-    #
-    # 
-    # FOREGROUND EXTRACTION
-    #
-    #
-    startTimeForeGroundExtraction = time.time()
+    nextFrame = frameList[i + 2]
+    
+    print("Frame Number {}".format(i+1))
 
     # Readying the frames
     previousFrameGray, currFrameGray, nextFrameGray = readyFrame(
@@ -45,53 +39,48 @@ while i < (len(frameList)-2):
     # Performing morphological operations
     final_image = morphologicalOperations(threshFrameDifferencing, 4, 4)
 
-    startTimeBlurringBinary = time.time()
-    # Blurring the binary image to get smooth shapes of objects
-    # final_image = cv2.medianBlur(img_erosion, 7)
-    # endTimeBlurringBinary = time.time()
-    # print("Final Blur--- %s seconds ---" %
-    #       (endTimeBlurringBinary - startTimeBlurringBinary))
+    endTimeForegroundExtrction=time.time()
+    print("Foreground Extraction--- %s seconds ---" % (endTimeForegroundExtrction - startTimeForeGroundExtraction))
 
-    endTimeForegroundExtraction=time.time()
-    print("Foreground Extraction--- %s seconds ---" % (endTimeForegroundExtraction - startTimeForeGroundExtraction))
-
-    #
-    #
-    # BALL DETECTION
-    #
-    #
-    startTimeBallDetection =time.time()
-
-    # Making a copy of pre-processed image frame
     final_image_copy = final_image.copy()
+    contours, hier = cv2.findContours(
+        final_image_copy, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-    # Finding contours in the frame
-    contours, hier = findContours(final_image_copy)
-
-    # Separating candidates based on size
-    ballCandidates, playerCadidates, incompletePlayerCandidates = sizeDetection(contours, currFrame)
-
-    # Removing candidates outside the Court Boundary in Dataset2 
-    if (datasetName == 'Dataset2'):
-        ballCandidates, playerCadidates, incompletePlayerCandidates = courtBoundaryDetection(ballCandidates,playerCadidates,incompletePlayerCandidates,currFrame)
+    min_BallArea = 300
+    max_BallArea = 1500
+    min_PlayerArea = 10000
+    min_IncompletePlayerArea = 1800
     
-    # Removing Candidates that are close to the Players
-    ballCandidatesFiltered = playerProximityDetection(ballCandidates, playerCadidates, incompletePlayerCandidates, currFrame)
-
-    # Removing candidates that are not in their expected region after motion
-    ballCandidatesFilteredProximity, ballCandidatesPreviousFrame =regionDetection(ballCandidatesFiltered,ballCandidatesPreviousFrame,currFrame)
-    
-    endTimeBallDetection = time.time()
-    print("Ball Detection--- %s seconds ---" % (endTimeBallDetection - startTimeBallDetection))
-
-    # Drawing and Displaying contours around the candidates 
-    for cand in ballCandidatesFilteredProximity:
-        if not cand:
-            cv2.imshow('Candidate image', currFrame)
+    ballCandidates = list()
+    playerCadidates = list()
+    incompletePlayerCandidates = list()
+    print(len(contours))
+    for cnt in contours:
+        M = cv2.moments(cnt)
+        if M["m00"] != 0:
+            cX = int(M["m10"] / M["m00"])
+            cY = int(M["m01"] / M["m00"])
         else:
-            cv2.drawContours(currFrame, [cand[3]], -1, (255, 0,), 2)
-            cv2.putText(currFrame, str(cand[0])+","+str(cand[1]),(cand[0]+1, cand[1]+1),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
-            cv2.imshow('Candidate image', currFrame)
+            continue
+        area = cv2.contourArea(cnt)
+        cv2.drawContours(currFrame, [cnt], -1, (0, 255, 0), 2)
+        perimeter = cv2.arcLength(cnt, True)
+        if area > min_PlayerArea:
+            playerCadidates.append((cX, cY, area, perimeter))
+            cv2.putText(currFrame, "Player Candidate", (cX, cY),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+        elif area > min_IncompletePlayerArea and area < min_PlayerArea:
+            incompletePlayerCandidates.append((cX, cY, area, perimeter))
+        elif area < max_BallArea and area > min_BallArea:
+            ballCandidates.append((cX, cY, area, perimeter))
+            cv2.drawContours(currFrame, [cnt], -1, (0, 255, 0), 1)
+            cv2.putText(currFrame, "Ball Candidate", (cX, cY),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+        elif area < min_BallArea:
+            continue
+        cv2.imshow('Candidate image', currFrame)
+        cv2.imwrite('d1view.png',currFrame)
+    print("Ball Canidates: %d" % len(ballCandidates))
+    print("Player Candidates: %d" % len(playerCadidates))
+    print("Incomplete Player Candidate: %d" %len(incompletePlayerCandidates))
 
     i += 1  # increments the loop
 

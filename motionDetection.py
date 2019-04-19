@@ -77,19 +77,19 @@ while i < (len(frameList)-2):
                     continue
             if ballCandFlag is True:
                 ballCandidatesFilteredProximity.append(cand)
-                cv2.putText(currFrame, "Candidate", (cand[0] + 1, cand[1] + 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 150, 192), 2)
-                cv2.drawContours(currFrame, [cand[3]], -1, (255, 0,), 2)
-                cv2.imshow('Candidate image', currFrame)
+                cv2.putText(currFrame, "Ball Candidate", (cand[0] + 1, cand[1] + 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+                cv2.drawContours(currFrame, [cand[3]], -1, (0, 255, 0), 2)
             else:
-                cv2.putText(currFrame, "Not", (cand[0] + 1, cand[1] + 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 150, 192), 2)
-                cv2.imshow('Candidate image', currFrame)
+                cv2.putText(currFrame, "Not Ball Candidate", (cand[0] + 1, cand[1] + 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+                cv2.drawContours(currFrame, [cand[3]], -1, (0, 255, 0), 2)
         ballCandidatesPreviousFrame = ballCandidatesFilteredProximity.copy()
+        cv2.imshow('Candidate image', currFrame)
     else:
         for cand in ballCandidatesFiltered:
-            cv2.drawContours(currFrame, [cand[3]], -1, (255, 0,), 2)
-            cv2.putText(currFrame, "Candidate", (cand[0] + 1, cand[1] + 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 150, 192), 2)
-            cv2.imshow('Candidate image', currFrame)
+            cv2.drawContours(currFrame, [cand[3]], -1, (0, 255, 0), 2)
+            cv2.putText(currFrame, "Ball Candidate", (cand[0] + 1, cand[1] + 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
         ballCandidatesPreviousFrame = ballCandidatesFiltered.copy()
+        cv2.imshow('Candidate image', currFrame)
     
     i += 1  # increments the loop
 

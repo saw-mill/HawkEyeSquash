@@ -16,7 +16,7 @@ def findContours(inputFrame):
 def sizeDetection(contours, currFrame,frameNumber):
         startTimeSizeDetection = time.time()
         min_BallArea = 300
-        max_BallArea = 1500
+        max_BallArea = 1800
         min_PlayerArea = 10000
         min_IncompletePlayerArea = 1800
 
@@ -74,7 +74,7 @@ def courtBoundaryDetection(ballCandidates, playerCadidates, incompletePlayerCand
 def playerProximityDetection(ballCandidates, playerCadidates, incompletePlayerCandidates, currFrame):
         startTimePlayerProximity = time.time()
         ballCandidatesFiltered = list()
-        min_BallDistance = 95
+        min_BallDistance = 100
 
         if not ballCandidates:
                 print("No ball Candidates")
@@ -128,7 +128,7 @@ def regionDetection(ballCandidatesFiltered, ballCandidatesPreviousFrame,currFram
                         ballCandFlag = False
                         for prevCand in ballCandidatesPreviousFrame:
                                 dist = math.sqrt(math.pow((cand[0] - prevCand[0]), 2) + math.pow((cand[1] - prevCand[1]), 2))
-                                if dist > 2 and dist < 70:
+                                if dist > 5 and dist < 70:
                                         ballCandFlag = True
                                 else:
                                         continue

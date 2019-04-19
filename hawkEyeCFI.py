@@ -7,9 +7,11 @@ from Modules.foregroundExtraction import readyFrame, frameDifferencing, morpholo
 from Modules.ballDetection import findContours, sizeDetection, playerProximityDetection, regionDetection, courtBoundaryDetection
 
 startTimeReadingFrames = time.time()
-datasetName= "Dataset2"
+datasetName= "Dataset1"
 # Location of dataset
-filenames = glob.glob(datasetName+"/*.jpg")
+filenames = glob.glob(datasetName + "/*.jpg")
+totalFramesDataset2 = 194
+totalFramesDataset1 = 560
 
 # Reading each frame and storing it in a list
 frameList = [cv2.imread(frame) for frame in natural_sort(filenames)]
@@ -29,8 +31,9 @@ while i < (len(frameList)-2):
     # Storing three frames
     previousFrame = frameList[i]
     currFrame = frameList[i+1]
-    nextFrame = frameList[i+2]
-
+    nextFrame = frameList[i + 2]
+    
+    print("Frame Number {}".format(i+1))
     #
     #
     # FOREGROUND EXTRACTION
@@ -47,14 +50,7 @@ while i < (len(frameList)-2):
         previousFrameGray, currFrameGray, nextFrameGray)
 
     # Performing morphological operations
-    img_erosion = morphologicalOperations(threshFrameDifferencing, 4, 4)
-
-    startTimeBlurringBinary = time.time()
-    # Blurring the binary image to get smooth shapes of objects
-    final_image = cv2.medianBlur(img_erosion, 7)
-    endTimeBlurringBinary = time.time()
-    print("Final Blur--- %s seconds ---" %
-          (endTimeBlurringBinary - startTimeBlurringBinary))
+    final_image = morphologicalOperations(threshFrameDifferencing, 4, 4)
 
     endTimeForegroundExtraction=time.time()
     print("Foreground Extraction--- %s seconds ---" % (endTimeForegroundExtraction - startTimeForeGroundExtraction))
@@ -67,10 +63,10 @@ while i < (len(frameList)-2):
     startTimeBallDetection =time.time()
 
     # Making a copy of pre-processed image frame
-    final_image_copy = final_image.copy()
+    # final_image_copy = final_image.copy()
 
     # Finding contours in the frame
-    contours, hier = findContours(final_image_copy)
+    contours, hier = findContours(final_image)
 
     # Separating candidates based on size
     ballCandidates, playerCadidates, incompletePlayerCandidates = sizeDetection(contours, currFrame,i)
@@ -105,7 +101,7 @@ while i < (len(frameList)-2):
             cv2.putText(currFrame, str(cand[0])+","+str(cand[1]),(cand[0]+1, cand[1]+1),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
             cv2.imshow('Candidate image', currFrame)
 
-    if (((i + 1) % 194) == 0):
+    if (((i + 1) % totalFramesDataset1) == 0):
         print(dictFrameNumberscX)
 
         for data_dict in dictFrameNumberscX.items():
@@ -118,7 +114,6 @@ while i < (len(frameList)-2):
                 plt.xlabel('Frame Number')
                 plt.ylabel('Candidate X-Coordinate')
                 plt.title("Candidate Feature Image X-coordinate")
-        # dictFrameNumberscX.clear()
         plt.show()
 
         for data_dict in dictFrameNumberscY.items():
@@ -131,7 +126,6 @@ while i < (len(frameList)-2):
                 plt.xlabel('Frame Number')
                 plt.ylabel('Candidate Y-Coordinate')
                 plt.title("Candidate Feature Image Y-coordinate")
-        # dictFrameNumberscX.clear()
         plt.show()
 
     

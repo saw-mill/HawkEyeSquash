@@ -79,7 +79,7 @@ while i < (len(frameList)-2):
     ballCandidatesFiltered = playerProximityDetection(ballCandidates, playerCadidates, incompletePlayerCandidates, currFrame)
 
     # Removing candidates that are not in their expected region after motion
-    ballCandidatesFilteredProximity, ballCandidatesPreviousFrame =regionDetection(ballCandidatesFiltered,ballCandidatesPreviousFrame,currFrame)
+    ballCandidatesFilteredProximity, ballCandidatesPreviousFrame = regionDetection(ballCandidatesFiltered, ballCandidatesPreviousFrame, currFrame)
     
     endTimeBallDetection = time.time()
     print("Ball Detection--- %s seconds ---" % (endTimeBallDetection - startTimeBallDetection))

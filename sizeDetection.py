@@ -24,7 +24,9 @@ while i < (len(frameList)-2):
     # Storing three frames
     previousFrame = frameList[i]
     currFrame = frameList[i+1]
-    nextFrame = frameList[i+2]
+    nextFrame = frameList[i + 2]
+    
+    print("Frame Number {}".format(i+1))
 
     # Readying the frames
     previousFrameGray, currFrameGray, nextFrameGray = readyFrame(
@@ -35,14 +37,7 @@ while i < (len(frameList)-2):
         previousFrameGray, currFrameGray, nextFrameGray)
 
     # Performing morphological operations
-    img_erosion = morphologicalOperations(threshFrameDifferencing, 4, 4)
-
-    startTimeBlurringBinary = time.time()
-    # Blurring the binary image to get smooth shapes of objects
-    final_image = cv2.medianBlur(img_erosion, 7)
-    endTimeBlurringBinary = time.time()
-    print("Final Blur--- %s seconds ---" %
-          (endTimeBlurringBinary - startTimeBlurringBinary))
+    final_image = morphologicalOperations(threshFrameDifferencing, 4, 4)
 
     endTimeForegroundExtrction=time.time()
     print("Foreground Extraction--- %s seconds ---" % (endTimeForegroundExtrction - startTimeForeGroundExtraction))
@@ -69,17 +64,19 @@ while i < (len(frameList)-2):
             continue
         area = cv2.contourArea(cnt)
         perimeter = cv2.arcLength(cnt, True)
-        if area > min_PlayerArea:
-            playerCadidates.append((cX, cY, area, perimeter))
-        elif area > min_IncompletePlayerArea and area < min_PlayerArea:
-            incompletePlayerCandidates.append((cX, cY, area, perimeter))
-        elif area < max_BallArea and area > min_BallArea:
-            ballCandidates.append((cX, cY, area, perimeter))
-            cv2.drawContours(currFrame, [cnt], -1, (0, 255, 0), 1)
-            cv2.putText(currFrame, str(area), (cX, cY),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
-        elif area < min_BallArea:
-            continue
+        cv2.drawContours(currFrame, [cnt], -1, (0, 255, 0), 2)
+        cv2.putText(currFrame, str(area), (cX, cY),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+        # if area > min_PlayerArea:
+        #     playerCadidates.append((cX, cY, area, perimeter))
+        # elif area > min_IncompletePlayerArea and area < min_PlayerArea:
+        #     incompletePlayerCandidates.append((cX, cY, area, perimeter))
+        # elif area < max_BallArea and area > min_BallArea:
+        #     ballCandidates.append((cX, cY, area, perimeter))
+        #     cv2.drawContours(currFrame, [cnt], -1, (0, 255, 0), 1)
+        #     cv2.putText(currFrame, str(area), (cX, cY),
+        #             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+        # elif area < min_BallArea:
+        #     continue
         cv2.imshow('Candidate image', currFrame)
     print("Ball Canidates: %d" % len(ballCandidates))
     print("Player Candidates: %d" % len(playerCadidates))
