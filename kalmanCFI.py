@@ -9,7 +9,7 @@ from Modules.foregroundExtraction import readyFrame, frameDifferencing, morpholo
 from Modules.ballDetection import findContours, sizeDetection, playerProximityDetection, regionDetection, courtBoundaryDetection
 
 startTimeReadingFrames = time.time()
-datasetName = "Dataset2"
+datasetName = "Dataset1"
 # Location of dataset
 filenames = glob.glob(datasetName + "/*.jpg")
 totalFramesDataset2 = 194
@@ -40,6 +40,7 @@ kalman.measurementNoiseCov = np.array([[1, 0], [0, 1]], np.float32) * 0.00003
 
 endKalmanInitTime = time.time()
 
+trackingTime = list()
 i = 0
 while i < (len(frameList)-2):
     # cv2.imshow("Frame {}".format(i),frameList[i])
@@ -103,20 +104,32 @@ while i < (len(frameList)-2):
     print("Ball Detection--- %s seconds ---" %
           (endTimeBallDetection - startTimeBallDetection))
 
+    #
+    #
+    # BALL TRACKING
+    #
+    #
+
     startKalmanPredTime = time.time()
 
+    # Calculating the centre of the image frame for initstate
     height, width, channels = currFrame.shape
     imageCenter = [width/2, height/2]
 
+    # First Frame
     if (i + 1 == 1):
+        # If no candidate detected, use image centre as initial state
         if not ballCandidatesFilteredProximity:
             initstate = imageCenter
+        # If Candidates detected
         else:
+            # If a single candidate detected, use it for the initial state
             if (len(ballCandidatesFilteredProximity) == 1):
                 x = ballCandidatesFilteredProximity[0][0]
                 y = ballCandidatesFilteredProximity[0][1]
                 mp = np.array([[np.float32(x)], [np.float32(y)]])
                 initstate = [mp[0], mp[1]]
+            # If multiple candidates, calculate candidate closest to the image centre for initial state
             else:
                 minDistInitCand = 10000
                 for cand in ballCandidatesFilteredProximity:
@@ -125,16 +138,21 @@ while i < (len(frameList)-2):
                     if (distCenter < minDistInitCand):
                         initstate = [cand[0], cand[1]]
                         minDistInitCand = distCenter
+        # Using Initstate for First Prediction
         tp[0] = initstate[0]
         tp[1] = initstate[1]
         cv2.circle(currFrame, (tp[0], tp[1]), 10, (0, 0, 255), -1)
         dictFrameNumberscX[i + 1] = tp[0]
         dictFrameNumberscY[i + 1] = tp[1]
+        # cv2.imshow('Candidate image', currFrame)
+    # If not the first frame
     else:
+        # Do Prediction
         tp = kalman.predict()
         tp[0] = tp[0] + initstate[0]
         tp[1] = tp[1] + initstate[1]
 
+        # If one candidate, measure and correct
         if (len(ballCandidatesFilteredProximity) == 1):
             for cand in ballCandidatesFilteredProximity:
                 x = cand[0]
@@ -167,12 +185,14 @@ while i < (len(frameList)-2):
                 cv2.drawContours(currFrame, [cand[3]], -1, (255, 0,), 2)
                 cv2.putText(currFrame, str(cand[0]) + "," + str(
                     cand[1]), (cand[0] + 1, cand[1] + 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
-                cv2.imshow('Candidate image', currFrame)
+                # cv2.imshow('Candidate image', currFrame)
 
+        # If multiple candidates, 
         elif(len(ballCandidatesFilteredProximity) > 1):
             minDistObject = 1000
             minDistXcoord = 0
             minDistYcoord = 0
+            # Calculate candidate closest to the prediction
             for cand in ballCandidatesFilteredProximity:
                 distncePredAct = math.sqrt(
                     math.pow((cand[0] - tp[0]), 2) + math.pow((cand[1] - tp[1]), 2))
@@ -190,11 +210,12 @@ while i < (len(frameList)-2):
                         minDistObject = distncePredAct
                         minDistXcoord = cand[0]
                         minDistYcoord = cand[1]
-
+            # If no candidate is close to the prediction, predict only
             if (minDistObject == 1000):
                 cv2.circle(currFrame, (tp[0], tp[1]), 10, (0, 0, 255), -1)
                 dictFrameNumberscX[i + 1] = tp[0]
-                dictFrameNumberscY[i+1] = tp[1]
+                dictFrameNumberscY[i + 1] = tp[1]
+            # If a candidate close to the prediction, use it for measurement and correction
             else:
                 x = minDistXcoord
                 y = minDistYcoord
@@ -212,20 +233,26 @@ while i < (len(frameList)-2):
                 cv2.drawContours(currFrame, [cand[3]], -1, (255, 0,), 2)
                 cv2.putText(currFrame, str(cand[0]) + "," + str(
                     cand[1]), (cand[0] + 1, cand[1] + 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
-                cv2.imshow('Candidate image', currFrame)
+                # cv2.imshow('Candidate image', currFrame)
+        # If no candidate detected, predict only
         else:
             cv2.circle(currFrame, (tp[0], tp[1]), 10, (0, 0, 255), -1)
             dictFrameNumberscX[i + 1] = tp[0]
             dictFrameNumberscY[i+1] = tp[1]
-            cv2.imshow('Candidate image', currFrame)
+            # cv2.imshow('Candidate image', currFrame)
 
     endKalmanPredTime = time.time()
+
+    trackingTime.append((endKalmanPredTime -
+                                                    startKalmanPredTime)+(endKalmanInitTime-startKalmanInitTime))
 
     print("Ball Tracking in --- %s seconds ---" % ((endKalmanPredTime -
                                                     startKalmanPredTime)+(endKalmanInitTime-startKalmanInitTime)))
 
+    # Print Ball Trajectory 2D Feature Image
     if (((i + 1) % totalFramesDataset1) == 0):
-        print(dictFrameNumberscX)
+        print("Average Tracking Time: {}".format(sum(trackingTime)/totalFramesDataset1))
+        # print(dictFrameNumberscX)
         keys = list(dictFrameNumberscX.keys())
         xvalues = list(dictFrameNumberscX.values())
         yvalues = list(dictFrameNumberscY.values())
@@ -266,10 +293,10 @@ while i < (len(frameList)-2):
     i += 1  # increments the loop
 
     # Exits the loop when Esc is pressed, goes to previous frame when space pressed and goes to next frame when any other key is pressed
-    k = cv2.waitKey(0)
-    if k == 27:
-        break
-    elif k == 32:
-        i -= 2
-    else:
-        continue
+    # k = cv2.waitKey(0)
+    # if k == 27:
+    #     break
+    # elif k == 32:
+    #     i -= 2
+    # else:
+    #     continue

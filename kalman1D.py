@@ -45,7 +45,7 @@ kalmanY.processNoiseCov = np.array([[1, 0], [0, 1]], np.float32) * 0.009
 kalmanY.measurementNoiseCov = np.array([[1]], np.float32) * 0.00003
 
 endKalmanInitTime = time.time()
-
+trackingTime = list()
 i = 0
 while i < (len(frameList)-2):
     # cv2.imshow("Frame {}".format(i),frameList[i])
@@ -166,7 +166,7 @@ while i < (len(frameList)-2):
 
                 cv2.drawContours(currFrame, [cand[3]], -1, (255, 0,), 2)
                 cv2.putText(currFrame, str(cand[0]) + "," + str(cand[1]), (cand[0] + 1, cand[1] + 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
-                cv2.imshow('Candidate image', currFrame)
+                # cv2.imshow('Candidate image', currFrame)
 
         elif(len(ballCandidatesFilteredProximity) > 1):
             minDistObject = 1000
@@ -210,19 +210,23 @@ while i < (len(frameList)-2):
 
                 cv2.drawContours(currFrame, [cand[3]], -1, (255, 0,), 2)
                 cv2.putText(currFrame, str(cand[0]) + "," + str(cand[1]), (cand[0] + 1, cand[1] + 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
-                cv2.imshow('Candidate image', currFrame)
+                # cv2.imshow('Candidate image', currFrame)
         else:
             cv2.circle(currFrame, (tpX[0], tpY[0]), 10, (0, 0, 255), -1)
             dictFrameNumberscX[i + 1] = tpX[0]
             dictFrameNumberscY[i + 1] = tpY[0]
-            cv2.imshow('Candidate image', currFrame)
+            # cv2.imshow('Candidate image', currFrame)
 
     endKalmanPredTime = time.time()
+
+    trackingTime.append((endKalmanPredTime -
+                                                    startKalmanPredTime)+(endKalmanInitTime-startKalmanInitTime))
 
     print("Ball Tracking in --- %s seconds ---" % ((endKalmanPredTime - startKalmanPredTime)+(endKalmanInitTime-startKalmanInitTime)))
 
     if (((i + 1) % totalFramesDataset1) == 0):
-        print(dictFrameNumberscX)
+        print("Average Tracking Time: {}".format(sum(trackingTime)/totalFramesDataset1))
+        # print(dictFrameNumberscX)
         keys = list(dictFrameNumberscX.keys())
         xvalues = list(dictFrameNumberscX.values())
         yvalues = list(dictFrameNumberscY.values())
@@ -263,10 +267,10 @@ while i < (len(frameList)-2):
     i += 1  # increments the loop
 
     # Exits the loop when Esc is pressed, goes to previous frame when space pressed and goes to next frame when any other key is pressed
-    k = cv2.waitKey(0)
-    if k == 27:
-        break
-    elif k == 32:
-        i -= 2
-    else:
-        continue
+    # k = cv2.waitKey(0)
+    # if k == 27:
+    #     break
+    # elif k == 32:
+    #     i -= 2
+    # else:
+    #     continue
