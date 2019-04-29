@@ -52,17 +52,17 @@ def courtBoundaryDetection(ballCandidates, playerCadidates, incompletePlayerCand
         playerCadidatesFilteredBoundary = list()
         incompletePlayerCandidatesFilteredBoundary = list()
         for cand in ballCandidates:
-                if (cand[0] < 145 or cand[0] > 1085):
+                if (cand[0] <= 145 or cand[0] > 1085):
                         continue
                 else:
                         ballCandidatesFilteredBoundary.append(cand)
         for playercand in playerCadidates:
-                if (playercand[0] < 145 or playercand[0] > 1085):
+                if (playercand[0] <= 145 or playercand[0] > 1085):
                         continue
                 else:
                         playerCadidatesFilteredBoundary.append(playercand)
         for incompletecand in incompletePlayerCandidates:
-                if (incompletecand[0] < 145 or incompletecand[0] > 1085):
+                if (incompletecand[0] <= 145 or incompletecand[0] > 1085):
                         continue
                 else:
                         incompletePlayerCandidatesFilteredBoundary.append(incompletecand)

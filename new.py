@@ -2,12 +2,8 @@ import glob
 import time
 import cv2
 import math
-import numpy as np
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 from Modules.foregroundExtraction import readyFrame, frameDifferencing, morphologicalOperations, natural_sort
 from Modules.ballDetection import findContours, sizeDetection, playerProximityDetection, regionDetection, courtBoundaryDetection
-# from Modules.ballTracking import kalmanInit, kalmanFirstFrame
 
 startTimeReadingFrames = time.time()
 datasetName= "Dataset2"
@@ -21,22 +17,7 @@ print("Reading Frames--- %s seconds ---" %
       (endTimeReadingFrames - startTimeReadingFrames))
 
 # Parsing through the frames
-dictFrameNumberscX = {}
-dictFrameNumberscY = {}
 ballCandidatesPreviousFrame = list()
-meas=[]
-pred = []
-mp = np.array((2, 1), np.float32)  # measurement
-tp = np.zeros((2, 1), np.float32)  # prediction
-
-# kalman = kalmanInit()
-
-kalman = cv2.KalmanFilter(4,2)
-kalman.measurementMatrix = np.array([[1, 0, 0, 0], [0, 1, 0, 0]], np.float32)
-kalman.transitionMatrix = np.array([[1,0,1,0],[0,1,0,1],[0,0,1,0],[0,0,0,1]],np.float32)
-kalman.processNoiseCov = np.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]], np.float32) * 0.009
-kalman.measurementNoiseCov = np.array([[1,0],[0,1]],np.float32) * 0.00003
-
 i = 0
 while i < (len(frameList)-2):
     # cv2.imshow("Frame {}".format(i),frameList[i])
@@ -44,9 +25,8 @@ while i < (len(frameList)-2):
     # Storing three frames
     previousFrame = frameList[i]
     currFrame = frameList[i+1]
-    nextFrame = frameList[i + 2]
-    
-    print("Frame Number {}".format(i+1))
+    nextFrame = frameList[i+2]
+
     #
     # 
     # FOREGROUND EXTRACTION
@@ -63,14 +43,14 @@ while i < (len(frameList)-2):
         previousFrameGray, currFrameGray, nextFrameGray)
 
     # Performing morphological operations
-    final_image = morphologicalOperations(threshFrameDifferencing, 4, 4)
+    img_erosion = morphologicalOperations(threshFrameDifferencing, 4, 4)
 
-    # startTimeBlurringBinary = time.time()
-    # # Blurring the binary image to get smooth shapes of objects
-    # final_image = cv2.medianBlur(img_erosion, 7)
-    # endTimeBlurringBinary = time.time()
-    # print("Final Blur--- %s seconds ---" %
-    #       (endTimeBlurringBinary - startTimeBlurringBinary))
+    startTimeBlurringBinary = time.time()
+    # Blurring the binary image to get smooth shapes of objects
+    final_image = cv2.medianBlur(img_erosion, 7)
+    endTimeBlurringBinary = time.time()
+    print("Final Blur--- %s seconds ---" %
+          (endTimeBlurringBinary - startTimeBlurringBinary))
 
     endTimeForegroundExtraction=time.time()
     print("Foreground Extraction--- %s seconds ---" % (endTimeForegroundExtraction - startTimeForeGroundExtraction))
@@ -91,155 +71,35 @@ while i < (len(frameList)-2):
     # Separating candidates based on size
     ballCandidates, playerCadidates, incompletePlayerCandidates = sizeDetection(contours, currFrame,i)
 
-    # Removing candidates outside the Court Boundary in Dataset2 
+    # # Removing candidates outside the Court Boundary in Dataset2 
     if (datasetName == 'Dataset2'):
         ballCandidates, playerCadidates, incompletePlayerCandidates = courtBoundaryDetection(ballCandidates,playerCadidates,incompletePlayerCandidates,currFrame)
     
     # Removing Candidates that are close to the Players
     ballCandidatesFiltered = playerProximityDetection(ballCandidates, playerCadidates, incompletePlayerCandidates, currFrame)
 
-    # Removing candidates that are not in their expected region after motion
-    ballCandidatesFilteredProximity, ballCandidatesPreviousFrame =regionDetection(ballCandidatesFiltered,ballCandidatesPreviousFrame,currFrame)
+    # # Removing candidates that are not in their expected region after motion
+    # ballCandidatesFilteredProximity, ballCandidatesPreviousFrame = regionDetection(ballCandidatesFiltered, ballCandidatesPreviousFrame, currFrame)
     
-    endTimeBallDetection = time.time()
-    print("Ball Detection--- %s seconds ---" % (endTimeBallDetection - startTimeBallDetection))
+    # endTimeBallDetection = time.time()
+    # print("Ball Detection--- %s seconds ---" % (endTimeBallDetection - startTimeBallDetection))
 
-    # print(kalman.gain)
-    height, width, channels = currFrame.shape
-    imageCenter=[width/2,height/2]
-
-    if (i + 1 == 1):
-        # tp, initstate = kalmanFirstFrame(currFrame, ballCandidatesFilteredProximity, tp, mp)
-        if not ballCandidatesFilteredProximity:
-            initstate = imageCenter
-        else:
-            if (len(ballCandidatesFilteredProximity) == 1):
-                x = ballCandidatesFilteredProximity[0][0]
-                y = ballCandidatesFilteredProximity[0][1]
-                mp = np.array([[np.float32(x)], [np.float32(y)]])
-                initstate = [mp[0], mp[1]]
-            else:
-                minDistInitCand=10000
-                for cand in ballCandidatesFilteredProximity:
-                    distCenter = math.sqrt(math.pow((cand[0] - imageCenter[0]), 2) + math.pow((cand[1] - imageCenter[1]), 2))
-                    if (distCenter < minDistInitCand):
-                        initstate = [cand[0], cand[1]]
-                        minDistInitCand = distCenter
-        tp[0] = initstate[0]
-        tp[1] = initstate[1]
-        pred.append((int(tp[0]), int(tp[1])))
-        cv2.circle(currFrame, (tp[0], tp[1]), 10, (0, 0, 255), -1)
-        dictFrameNumberscX[i + 1] = tp[0]
-        dictFrameNumberscY[i + 1] = tp[1]       
-    else:
-        tp = kalman.predict()
-        tp[0] = tp[0] + initstate[0]
-        tp[1] = tp[1] + initstate[1]
-        # pred.append((int(tp[0]), int(tp[1])))
-
-        if (len(ballCandidatesFilteredProximity) == 1):
-            for cand in ballCandidatesFilteredProximity:
-                x = cand[0]
-                y = cand[1]
-                x = x - initstate[0]
-                y = y - initstate[1]
-                mp = np.array([[np.float32(x)], [np.float32(y)]])
-                meas.append((x, y))
-                corrected = kalman.correct(mp)
-                corrected[0] = corrected[0] + initstate[0]
-                corrected[1] = corrected[1] + initstate[1]
-                cv2.circle(currFrame, (corrected[0], corrected[1]), 10, (0, 255, 0), -1)
-                dictFrameNumberscX[i + 1] = corrected[0]
-                dictFrameNumberscY[i+1] = corrected[1]
-                # cv2.circle(currFrame, (tp[0], tp[1]), 10, (0, 0, 255), -1) #pred
-                # distncePredAct = math.sqrt(math.pow((cand[0] - tp[0]), 2) + math.pow((cand[1] - tp[1]), 2))
-                # print("Distance predact {}".format(distncePredAct))
-
-                # if (distncePredAct < 70):
-                #     cv2.circle(currFrame, (corrected[0], corrected[1]), 10, (0, 255, 0), -1)
-                #     cv2.circle(currFrame, (tp[0], tp[1]), 10, (0, 0, 255), -1) #pred
-                #     dictFrameNumberscX[i + 1] = corrected[0]
-                #     dictFrameNumberscY[i+1] = corrected[1]
-                # else:
-                #     cv2.circle(currFrame, (tp[0], tp[1]), 10, (0, 0, 255), -1)
-                #     dictFrameNumberscX[i + 1] = tp[0]
-                #     dictFrameNumberscY[i+1] = tp[1]
-
-                cv2.drawContours(currFrame, [cand[3]], -1, (255, 0,), 2)
-                cv2.putText(currFrame, str(cand[0]) + "," + str(cand[1]), (cand[0] + 1, cand[1] + 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
-                cv2.imshow('Candidate image', currFrame)
-
-        elif(len(ballCandidatesFilteredProximity) > 1):
-            print(meas)
-            minDistObject = 1000
-            minDistXcoord = 0
-            minDistYcoord = 0
-            for cand in ballCandidatesFilteredProximity:
-                distncePredAct = math.sqrt(math.pow((cand[0] - tp[0]), 2) + math.pow((cand[1] - tp[1]), 2))
-                if (distncePredAct < 50):
-                    if (distncePredAct < minDistObject):
-                        minDistObject = distncePredAct
-                        minDistXcoord = cand[0]
-                        minDistYcoord = cand[1]
-
-            if (minDistObject == 1000):
-                cv2.circle(currFrame, (tp[0], tp[1]), 10, (0, 0, 255), -1)
-                dictFrameNumberscX[i + 1] = tp[0]
-                dictFrameNumberscY[i+1] = tp[1]
-            else:
-                x = minDistXcoord
-                y = minDistYcoord
-                x = x - initstate[0]
-                y = y - initstate[1]
-                mp = np.array([[np.float32(x)], [np.float32(y)]])
-                meas.append((x, y))
-                corrected = kalman.correct(mp)
-                corrected[0] = corrected[0] + initstate[0]
-                corrected[1] = corrected[1] + initstate[1]
-                cv2.circle(currFrame, (corrected[0], corrected[1]), 10, (0, 255, 0), -1)
-                # cv2.circle(currFrame, (tp[0], tp[1]), 10, (0, 0, 255), -1) #pred
-                dictFrameNumberscX[i + 1] = corrected[0]
-                dictFrameNumberscY[i+1] = corrected[1]
-
-                
+    # Drawing and Displaying contours around the candidates 
+    if (len(ballCandidatesFiltered) > 0):
+        for cand in ballCandidatesFiltered:
             cv2.drawContours(currFrame, [cand[3]], -1, (255, 0,), 2)
-            cv2.putText(currFrame, str(cand[0]) + "," + str(cand[1]), (cand[0] + 1, cand[1] + 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+            cv2.putText(currFrame, str(cand[0])+","+str(cand[1]),(cand[0]+1, cand[1]+1),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
             cv2.imshow('Candidate image', currFrame)
-        else:
-            cv2.circle(currFrame, (tp[0], tp[1]), 10, (0, 0, 255), -1)
-            dictFrameNumberscX[i + 1] = tp[0]
-            dictFrameNumberscY[i+1] = tp[1]
-            cv2.imshow('Candidate image', currFrame)
-
-    if (((i + 1) % 560) == 0):
-        print(dictFrameNumberscX)
-        keys = list(dictFrameNumberscX.keys())
-        xvalues = list(dictFrameNumberscX.values())
-        yvalues = list(dictFrameNumberscY.values())
-        plt.xlabel('Frame Number')
-        plt.ylabel('Candidate Kalman X-Coordinate')
-        plt.title('CFI with Kalman X Prediction')
-        plt.plot(keys, xvalues, 'r--', linewidth=2)
-        plt.show()
-        # print(dictFrameNumberscY)
-        # for data_dict in dictFrameNumberscX.items():
-        #     print(data_dict)
-        #     x = data_dict[0]
-        #     values = data_dict[1]
-        #     for value in values:
-        #         # plt.subplot(1, 2, 1)
-        #         plt.scatter(x,value)
-        #         plt.xlabel('Frame Number')
-        #         plt.ylabel('Candidate X-Coordinate')
-        #         plt.title("Candidate Feature Image X-coordinate")
-        # dictFrameNumberscX.clear()
-        plt.show()
+    else:
+        cv2.imshow('Candidate image', currFrame)
         
-        # plt.xlabel('Frame Number')
-        # plt.ylabel('Candidate Kalman Y-Coordinate')
-        # plt.title('CFI with Kalman Y Prediction')
-        # plt.plot(keys, yvalues, 'g--', linewidth=2)
-        # plt.show()    
+    # for cand in ballCandidates:
+    #     if not cand:
+    #         cv2.imshow('Candidate image', currFrame)
+    #     else:
+    #         cv2.drawContours(currFrame, [cand[3]], -1, (255, 0,), 2)
+    #         cv2.putText(currFrame, str(cand[0])+","+str(cand[1]),(cand[0]+1, cand[1]+1),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+    #         cv2.imshow('Candidate image', currFrame)
 
     i += 1  # increments the loop
 
