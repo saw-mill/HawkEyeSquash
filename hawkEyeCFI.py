@@ -7,11 +7,13 @@ from Modules.foregroundExtraction import readyFrame, frameDifferencing, morpholo
 from Modules.ballDetection import findContours, sizeDetection, playerProximityDetection, regionDetection, courtBoundaryDetection
 
 startTimeReadingFrames = time.time()
-datasetName= "Dataset1"
+datasetName = "Dataset2"
 # Location of dataset
 filenames = glob.glob(datasetName + "/*.jpg")
-totalFramesDataset2 = 194
-totalFramesDataset1 = 560
+if (datasetName == "Dataset1"):
+    totalFramesDataset = 560
+elif (datasetName == "Dataset2"):
+    totalFramesDataset = 194
 
 # Reading each frame and storing it in a list
 frameList = [cv2.imread(frame) for frame in natural_sort(filenames)]
@@ -32,7 +34,7 @@ while i < (len(frameList)-2):
     previousFrame = frameList[i]
     currFrame = frameList[i+1]
     nextFrame = frameList[i + 2]
-    
+
     print("Frame Number {}".format(i+1))
     #
     #
@@ -52,15 +54,18 @@ while i < (len(frameList)-2):
     # Performing morphological operations
     final_image = morphologicalOperations(threshFrameDifferencing, 4, 4)
 
-    endTimeForegroundExtraction=time.time()
-    print("Foreground Extraction--- %s seconds ---" % (endTimeForegroundExtraction - startTimeForeGroundExtraction))
+    # final_image = cv2.medianBlur(final_image,7)
+
+    endTimeForegroundExtraction = time.time()
+    print("Foreground Extraction--- %s seconds ---" %
+          (endTimeForegroundExtraction - startTimeForeGroundExtraction))
 
     #
     #
     # BALL DETECTION
     #
     #
-    startTimeBallDetection =time.time()
+    startTimeBallDetection = time.time()
 
     # Making a copy of pre-processed image frame
     # final_image_copy = final_image.copy()
@@ -69,21 +74,25 @@ while i < (len(frameList)-2):
     contours, hier = findContours(final_image)
 
     # Separating candidates based on size
-    ballCandidates, playerCadidates, incompletePlayerCandidates = sizeDetection(contours, currFrame,i)
+    ballCandidates, playerCadidates, incompletePlayerCandidates = sizeDetection(
+        contours, currFrame, i)
 
     # Removing candidates outside the Court Boundary in Dataset2
     if (datasetName == 'Dataset2'):
-        ballCandidates, playerCadidates, incompletePlayerCandidates = courtBoundaryDetection(ballCandidates,playerCadidates,incompletePlayerCandidates,currFrame)
+        ballCandidates, playerCadidates, incompletePlayerCandidates = courtBoundaryDetection(
+            ballCandidates, playerCadidates, incompletePlayerCandidates, currFrame)
 
     # Removing Candidates that are close to the Players
-    ballCandidatesFiltered = playerProximityDetection(ballCandidates, playerCadidates, incompletePlayerCandidates, currFrame)
+    ballCandidatesFiltered = playerProximityDetection(
+        ballCandidates, playerCadidates, incompletePlayerCandidates, currFrame)
 
     # Removing candidates that are not in their expected region after motion
-    ballCandidatesFilteredProximity, ballCandidatesPreviousFrame =regionDetection(ballCandidatesFiltered,ballCandidatesPreviousFrame,currFrame)
+    ballCandidatesFilteredProximity, ballCandidatesPreviousFrame = regionDetection(
+        ballCandidatesFiltered, ballCandidatesPreviousFrame, currFrame)
 
     endTimeBallDetection = time.time()
-    print("Ball Detection--- %s seconds ---" % (endTimeBallDetection - startTimeBallDetection))
-
+    print("Ball Detection--- %s seconds ---" %
+          (endTimeBallDetection - startTimeBallDetection))
 
     # Adding candidates in containers for CFI plotting
     dictFrameNumberscX[i+1] = []
@@ -98,10 +107,12 @@ while i < (len(frameList)-2):
             cv2.imshow('Candidate image', currFrame)
         else:
             cv2.drawContours(currFrame, [cand[3]], -1, (255, 0,), 2)
-            cv2.putText(currFrame, str(cand[0])+","+str(cand[1]),(cand[0]+1, cand[1]+1),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
-            cv2.imshow('Candidate image', currFrame)
+            cv2.putText(currFrame, str(cand[0]) + "," + str(cand[1]), (cand[0] + 1,
+                                                                       cand[1] + 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+            if(__debug__):
+                cv2.imshow('Candidate image', currFrame)
 
-    if (((i + 1) % totalFramesDataset1) == 0):
+    if (((i + 1) % totalFramesDataset) == 0):
         print(dictFrameNumberscX)
 
         for data_dict in dictFrameNumberscX.items():
@@ -110,10 +121,12 @@ while i < (len(frameList)-2):
             values = data_dict[1]
             for value in values:
                 # plt.subplot(1, 2, 1)
-                plt.scatter(x,value)
+                plt.scatter(x, value)
                 plt.xlabel('Frame Number')
                 plt.ylabel('Candidate X-Coordinate')
                 plt.title("Candidate Feature Image X-coordinate")
+                # plt.axis([-20, 600, 0, 1300])
+                plt.axis([-20, 210, 100, 1200])
         plt.show()
 
         for data_dict in dictFrameNumberscY.items():
@@ -122,20 +135,22 @@ while i < (len(frameList)-2):
             values = data_dict[1]
             for value in values:
                 # plt.subplot(1, 2, 2)
-                plt.scatter(x,value)
+                plt.scatter(x, value)
                 plt.xlabel('Frame Number')
                 plt.ylabel('Candidate Y-Coordinate')
                 plt.title("Candidate Feature Image Y-coordinate")
+                # plt.axis([-20, 600, 25, 1000])
+                plt.axis([-20, 210, 50, 900])
         plt.show()
 
-    
     i += 1  # increments the loop
 
     # Exits the loop when Esc is pressed, goes to previous frame when space pressed and goes to next frame when any other key is pressed
-    # k = cv2.waitKey(0)
-    # if k == 27:
-    #     break
-    # elif k == 32:
-    #     i -= 2
-    # else:
-    #     continue
+    if(__debug__):
+        k = cv2.waitKey(0)
+        if k == 27:
+            break
+        elif k == 32:
+            i -= 2
+        else:
+            continue

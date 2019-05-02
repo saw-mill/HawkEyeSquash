@@ -9,11 +9,14 @@ from Modules.foregroundExtraction import readyFrame, frameDifferencing, morpholo
 from Modules.ballDetection import findContours, sizeDetection, playerProximityDetection, regionDetection, courtBoundaryDetection
 
 startTimeReadingFrames = time.time()
-datasetName = "Dataset1"
+datasetName = "Dataset2"
 # Location of dataset
 filenames = glob.glob(datasetName + "/*.jpg")
-totalFramesDataset2 = 194
-totalFramesDataset1 = 560
+
+if (datasetName == "Dataset1"):
+    totalFramesDataset = 560
+elif (datasetName == "Dataset2"):
+    totalFramesDataset = 194
 
 # Reading each frame and storing it in a list
 frameList = [cv2.imread(frame) for frame in natural_sort(filenames)]
@@ -69,6 +72,9 @@ while i < (len(frameList)-2):
     # Performing morphological operations
     final_image = morphologicalOperations(threshFrameDifferencing, 4, 4)
 
+    # final_image = cv2.medianBlur(final_image,7)
+
+    cv2.imshow('final image', final_image)
     endTimeForegroundExtraction = time.time()
     print("Foreground Extraction--- %s seconds ---" %
           (endTimeForegroundExtraction - startTimeForeGroundExtraction))
@@ -144,7 +150,8 @@ while i < (len(frameList)-2):
         cv2.circle(currFrame, (tp[0], tp[1]), 10, (0, 0, 255), -1)
         dictFrameNumberscX[i + 1] = tp[0]
         dictFrameNumberscY[i + 1] = tp[1]
-        # cv2.imshow('Candidate image', currFrame)
+        if(__debug__):
+            cv2.imshow('Candidate image', currFrame)
     # If not the first frame
     else:
         # Do Prediction
@@ -155,6 +162,8 @@ while i < (len(frameList)-2):
         # If one candidate, measure and correct
         if (len(ballCandidatesFilteredProximity) == 1):
             for cand in ballCandidatesFilteredProximity:
+                # distncePredAct = math.sqrt(
+                #     math.pow((cand[0] - tp[0]), 2) + math.pow((cand[1] - tp[1]), 2))
                 x = cand[0]
                 y = cand[1]
                 x = x - initstate[0]
@@ -166,11 +175,9 @@ while i < (len(frameList)-2):
                 cv2.circle(
                     currFrame, (corrected[0], corrected[1]), 10, (0, 255, 0), -1)
                 dictFrameNumberscX[i + 1] = corrected[0]
-                dictFrameNumberscY[i+1] = corrected[1]
-                # cv2.circle(currFrame, (tp[0], tp[1]),
+                dictFrameNumberscY[i + 1] = corrected[1]
+            # cv2.circle(currFrame, (tp[0], tp[1]),
                 #            10, (0, 0, 255), -1)  # pred
-                distncePredAct = math.sqrt(
-                    math.pow((cand[0] - tp[0]), 2) + math.pow((cand[1] - tp[1]), 2))
 
                 # #drawing a line
                 # cv2.line(currFrame, (int(cand[0]), int(cand[1])), (int(
@@ -183,11 +190,12 @@ while i < (len(frameList)-2):
                 # print("Distance predact {}".format(distncePredAct))
 
                 cv2.drawContours(currFrame, [cand[3]], -1, (255, 0,), 2)
-                cv2.putText(currFrame, str(cand[0]) + "," + str(
-                    cand[1]), (cand[0] + 1, cand[1] + 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
-                # cv2.imshow('Candidate image', currFrame)
+                cv2.putText(currFrame, str(
+                    cand[2]), (cand[0] + 1, cand[1] + 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+            if(__debug__):
+                cv2.imshow('Candidate image', currFrame)
 
-        # If multiple candidates, 
+        # If multiple candidates,
         elif(len(ballCandidatesFilteredProximity) > 1):
             minDistObject = 1000
             minDistXcoord = 0
@@ -231,27 +239,30 @@ while i < (len(frameList)-2):
                 dictFrameNumberscY[i+1] = corrected[1]
 
                 cv2.drawContours(currFrame, [cand[3]], -1, (255, 0,), 2)
-                cv2.putText(currFrame, str(cand[0]) + "," + str(
-                    cand[1]), (cand[0] + 1, cand[1] + 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
-                # cv2.imshow('Candidate image', currFrame)
+                cv2.putText(currFrame, str(
+                    cand[2]), (cand[0] + 1, cand[1] + 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+            if(__debug__):
+                cv2.imshow('Candidate image', currFrame)
         # If no candidate detected, predict only
         else:
             cv2.circle(currFrame, (tp[0], tp[1]), 10, (0, 0, 255), -1)
             dictFrameNumberscX[i + 1] = tp[0]
             dictFrameNumberscY[i+1] = tp[1]
-            # cv2.imshow('Candidate image', currFrame)
+            if(__debug__):
+                cv2.imshow('Candidate image', currFrame)
 
     endKalmanPredTime = time.time()
 
     trackingTime.append((endKalmanPredTime -
-                                                    startKalmanPredTime)+(endKalmanInitTime-startKalmanInitTime))
+                         startKalmanPredTime)+(endKalmanInitTime-startKalmanInitTime))
 
     print("Ball Tracking in --- %s seconds ---" % ((endKalmanPredTime -
                                                     startKalmanPredTime)+(endKalmanInitTime-startKalmanInitTime)))
 
     # Print Ball Trajectory 2D Feature Image
-    if (((i + 1) % totalFramesDataset1) == 0):
-        print("Average Tracking Time: {}".format(sum(trackingTime)/totalFramesDataset1))
+    if (((i + 1) % totalFramesDataset) == 0):
+        print("Average Tracking Time: {}".format(
+            sum(trackingTime)/totalFramesDataset))
         # print(dictFrameNumberscX)
         keys = list(dictFrameNumberscX.keys())
         xvalues = list(dictFrameNumberscX.values())
@@ -260,12 +271,16 @@ while i < (len(frameList)-2):
         plt.ylabel('Candidate Kalman X-Coordinate')
         plt.title('CFI with Kalman X Prediction')
         plt.plot(keys, xvalues, 'r--', linewidth=2)
+        # plt.axis([-20, 600, 0, 1300])
+        # plt.axis([-20,210,100,1200])
         plt.show()
 
         plt.xlabel('Frame Number')
         plt.ylabel('Candidate Kalman Y-Coordinate')
         plt.title('CFI with Kalman Y Prediction')
         plt.plot(keys, yvalues, 'g--', linewidth=2)
+        # plt.axis([-20, 600, 25, 1000])
+        # plt.axis([-20,210,50,900])
         plt.show()
 
         # scatter plot
@@ -293,10 +308,11 @@ while i < (len(frameList)-2):
     i += 1  # increments the loop
 
     # Exits the loop when Esc is pressed, goes to previous frame when space pressed and goes to next frame when any other key is pressed
-    # k = cv2.waitKey(0)
-    # if k == 27:
-    #     break
-    # elif k == 32:
-    #     i -= 2
-    # else:
-    #     continue
+    if(__debug__):
+        k = cv2.waitKey(0)
+        if k == 27:
+            break
+        elif k == 32:
+            i -= 2
+        else:
+            continue

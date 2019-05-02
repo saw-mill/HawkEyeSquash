@@ -157,18 +157,19 @@ while i < (len(frameList)-2):
         # print(predYcoord)
         cv2.drawContours(
             currFrame, [ballCandidatesFilteredProximity[0][3]], -1, (255, 0,), 2)
-        # cv2.imshow('Candidate image', currFrame)
-    
+        if(__debug__):
+            cv2.imshow('Candidate image', currFrame)
+
     # If not the first frame
     else:
         # if one candidate, do prediction then estimation
         if (len(ballCandidatesFilteredProximity) == 1):
             # Prediction using estimation parameters from the previous frame
             predXcoord.append(
-                round(levelEstimateXcoord[i-1] + trendEstimateXcoord[i-1], 2)) 
+                round(levelEstimateXcoord[i-1] + trendEstimateXcoord[i-1], 2))
             predYcoord.append(
                 round(levelEstimateYcoord[i - 1] + trendEstimateYcoord[i - 1], 2))
-                
+
             # Estimation using the detection in current frame
             levelEstimateXcoord.append(alphaXcoord * ballCandidatesFilteredProximity[0][0] + (
                 1 - alphaXcoord) * (levelEstimateXcoord[i-1] + trendEstimateXcoord[i-1]))
@@ -198,7 +199,8 @@ while i < (len(frameList)-2):
 
             cv2.drawContours(
                 currFrame, [ballCandidatesFilteredProximity[0][3]], -1, (255, 0,), 2)
-            # cv2.imshow('Candidate image', currFrame)
+            if(__debug__):
+                cv2.imshow('Candidate image', currFrame)
 
         # If multiple candidates
         elif (len(ballCandidatesFilteredProximity) > 1):
@@ -283,7 +285,8 @@ while i < (len(frameList)-2):
                 cv2.drawContours(currFrame, [cand[3]], -1, (255, 0,), 2)
                 cv2.putText(currFrame, str(cand[0]) + "," + str(
                     cand[1]), (cand[0] + 1, cand[1] + 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
-                # cv2.imshow('Candidate image', currFrame)
+                if(__debug__):
+                    cv2.imshow('Candidate image', currFrame)
 
         # If no candidate detected
         else:
@@ -322,7 +325,8 @@ while i < (len(frameList)-2):
                 currFrame, (int(predXcoord[i-1]), int(predYcoord[i-1])), 10, (0, 0, 255), -1)
             dictFrameNumberscX[i + 1] = predXcoord[i-1]
             dictFrameNumberscY[i + 1] = predYcoord[i-1]
-            # cv2.imshow('Candidate image', currFrame)
+            if(__debug__):
+                cv2.imshow('Candidate image', currFrame)
 
     endTimeExponentialPred = time.time()
     trackingTime.append(endTimeExponentialPred-startTimeExponentialPred)
@@ -353,10 +357,11 @@ while i < (len(frameList)-2):
     i += 1  # increments the loop
 
     # Exits the loop when Esc is pressed, goes to previous frame when space pressed and goes to next frame when any other key is pressed
-    # k = cv2.waitKey(0)
-    # if k == 27:
-    #     break
-    # elif k == 32:
-    #     i -= 2
-    # else:
-    #     continue
+    if(__debug__):
+        k = cv2.waitKey(0)
+        if k == 27:
+            break
+        elif k == 32:
+            i -= 2
+        else:
+            continue
