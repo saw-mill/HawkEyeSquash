@@ -52,7 +52,7 @@ while i < (len(frameList)-2):
         final_image_copy, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
     min_BallArea = 300
-    max_BallArea = 1500
+    max_BallArea = 1800
     min_PlayerArea = 10000
     min_IncompletePlayerArea = 1800
     min_BallDistance = 95
@@ -122,18 +122,25 @@ while i < (len(frameList)-2):
             else:
                 continue
             minDist = round(minDist, 2)
-            if (minDist >= min_BallDistance):
-                cand.append(minDist)
-                cand.append(minDistPoint)
-                ballCandidatesFiltered.append(cand)
-                cv2.line(currFrame, (int(cand[0]), int(cand[1])), (int(
-                minDistPoint[0]), int(minDistPoint[1])), (255, 0, 0), 2)
-                xmidPointPlayer = (cand[0]+minDistPoint[0])*0.5
-                ymidPointPlayer = (cand[1]+minDistPoint[1])*0.5
-                cv2.putText(currFrame, str(minDist), (int(xmidPointPlayer), int(
-                ymidPointPlayer)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+            cv2.line(currFrame, (int(cand[0]), int(cand[1])), (int(
+            minDistPoint[0]), int(minDistPoint[1])), (255, 0, 0), 2)
+            xmidPointPlayer = (cand[0]+minDistPoint[0])*0.5
+            ymidPointPlayer = (cand[1]+minDistPoint[1])*0.5
+            cv2.putText(currFrame, str(minDist), (int(xmidPointPlayer), int(
+            ymidPointPlayer)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+            cv2.imshow('Candidate image', currFrame)
+            # if (minDist >= min_BallDistance):
+            #     cand.append(minDist)
+            #     cand.append(minDistPoint)
+            #     ballCandidatesFiltered.append(cand)
+            #     cv2.line(currFrame, (int(cand[0]), int(cand[1])), (int(
+            #     minDistPoint[0]), int(minDistPoint[1])), (255, 0, 0), 2)
+            #     xmidPointPlayer = (cand[0]+minDistPoint[0])*0.5
+            #     ymidPointPlayer = (cand[1]+minDistPoint[1])*0.5
+            #     cv2.putText(currFrame, str(minDist), (int(xmidPointPlayer), int(
+            #     ymidPointPlayer)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
-                cv2.imshow('Candidate image', currFrame)
+            #     cv2.imshow('Candidate image', currFrame)
 
     i += 1  # increments the loop
 

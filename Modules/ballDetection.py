@@ -13,10 +13,10 @@ def findContours(inputFrame):
         print("Contours found in--- %s seconds ---" %(endTimeFindingContours-startTimeFindingContours))
         return contours, hier
 
-def sizeDetection(contours, currFrame):
+def sizeDetection(contours, currFrame,frameNumber):
         startTimeSizeDetection = time.time()
         min_BallArea = 300
-        max_BallArea = 1500
+        max_BallArea = 1800
         min_PlayerArea = 10000
         min_IncompletePlayerArea = 1800
 
@@ -33,11 +33,11 @@ def sizeDetection(contours, currFrame):
                         continue
                 area = cv2.contourArea(cnt)
                 if area > min_PlayerArea:
-                        playerCadidates.append([cX, cY, area, cnt])
+                        playerCadidates.append([cX, cY, area, cnt,frameNumber])
                 elif area > min_IncompletePlayerArea and area < min_PlayerArea:
-                        incompletePlayerCandidates.append([cX, cY, area, cnt])
+                        incompletePlayerCandidates.append([cX, cY, area, cnt,frameNumber])
                 elif area < max_BallArea and area > min_BallArea:
-                        ballCandidates.append([cX, cY, area, cnt])
+                        ballCandidates.append([cX, cY, area, cnt,frameNumber])
                         # cv2.drawContours(currFrame, [cnt], -1, (0, 255, 0), 1)
                         # cv2.putText(currFrame, str(area), (cX, cY),
                         # cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
@@ -52,17 +52,17 @@ def courtBoundaryDetection(ballCandidates, playerCadidates, incompletePlayerCand
         playerCadidatesFilteredBoundary = list()
         incompletePlayerCandidatesFilteredBoundary = list()
         for cand in ballCandidates:
-                if (cand[0] < 145 or cand[0] > 1085):
+                if (cand[0] <= 145 or cand[0] > 1085):
                         continue
                 else:
                         ballCandidatesFilteredBoundary.append(cand)
         for playercand in playerCadidates:
-                if (playercand[0] < 145 or playercand[0] > 1085):
+                if (playercand[0] <= 145 or playercand[0] > 1085):
                         continue
                 else:
                         playerCadidatesFilteredBoundary.append(playercand)
         for incompletecand in incompletePlayerCandidates:
-                if (incompletecand[0] < 145 or incompletecand[0] > 1085):
+                if (incompletecand[0] <= 145 or incompletecand[0] > 1085):
                         continue
                 else:
                         incompletePlayerCandidatesFilteredBoundary.append(incompletecand)
@@ -74,7 +74,7 @@ def courtBoundaryDetection(ballCandidates, playerCadidates, incompletePlayerCand
 def playerProximityDetection(ballCandidates, playerCadidates, incompletePlayerCandidates, currFrame):
         startTimePlayerProximity = time.time()
         ballCandidatesFiltered = list()
-        min_BallDistance = 95
+        min_BallDistance = 100
 
         if not ballCandidates:
                 print("No ball Candidates")
@@ -128,7 +128,7 @@ def regionDetection(ballCandidatesFiltered, ballCandidatesPreviousFrame,currFram
                         ballCandFlag = False
                         for prevCand in ballCandidatesPreviousFrame:
                                 dist = math.sqrt(math.pow((cand[0] - prevCand[0]), 2) + math.pow((cand[1] - prevCand[1]), 2))
-                                if dist > 2 and dist < 70:
+                                if dist > 5 and dist < 70:
                                         ballCandFlag = True
                                 else:
                                         continue
