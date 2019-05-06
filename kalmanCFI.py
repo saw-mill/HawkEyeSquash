@@ -9,7 +9,7 @@ from Modules.foregroundExtraction import readyFrame, frameDifferencing, morpholo
 from Modules.ballDetection import findContours, sizeDetection, playerProximityDetection, regionDetection, courtBoundaryDetection
 
 startTimeReadingFrames = time.time()
-datasetName = "Dataset2"
+datasetName = "Dataset1"
 # Location of dataset
 filenames = glob.glob(datasetName + "/*.jpg")
 
