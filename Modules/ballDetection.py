@@ -1,9 +1,6 @@
 import numpy as np
 import cv2
-import imutils
 import time
-from PIL import Image
-import re
 import math
 
 def findContours(inputFrame):
@@ -142,14 +139,14 @@ def regionDetection(ballCandidatesFiltered, ballCandidatesPreviousFrame,currFram
                                 continue
                                 # cv2.putText(currFrame, "Not", (cand[0] + 1, cand[1] + 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 150, 192), 2)
                                 # cv2.imshow('Candidate image', currFrame)
-                ballCandidatesPreviousFrame = ballCandidatesFilteredProximity.copy()
+                ballCandidatesPreviousFrame = ballCandidatesFilteredProximity
         else:
-                for cand in ballCandidatesFiltered:
-                        ballCandidatesFilteredProximity.append(cand)
+                # for cand in ballCandidatesFiltered:
+                ballCandidatesFilteredProximity = ballCandidatesFiltered
                         # cv2.drawContours(currFrame, [cand[3]], -1, (255, 0,), 2)
                         # cv2.putText(currFrame, "Maybe", (cand[0] + 1, cand[1] + 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 150, 192), 2)
                         # cv2.imshow('Candidate image', currFrame)
-                ballCandidatesPreviousFrame = ballCandidatesFiltered.copy()
+                ballCandidatesPreviousFrame = ballCandidatesFiltered
         endTimeRegionDetection = time.time()
         print("Expected Region based filtering in--- %s seconds ---" % (endTimeRegionDetection - startTimeRegionDetection))
         print("Ball Candidates: %d" % len(ballCandidatesFilteredProximity))

@@ -1,7 +1,6 @@
 import glob
 import time
 import cv2
-import math
 import matplotlib.pyplot as plt
 from Modules.foregroundExtraction import readyFrame, frameDifferencing, morphologicalOperations, natural_sort
 from Modules.ballDetection import findContours, sizeDetection, playerProximityDetection, regionDetection, courtBoundaryDetection

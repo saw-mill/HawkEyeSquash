@@ -1,10 +1,9 @@
 import numpy as np
 import cv2
-import imutils
+# import imutils
 import time
-from PIL import Image
 import re
-from matplotlib import pyplot as plt
+# from matplotlib import pyplot as plt
 
 # Function to sort a list in natural manner
 def natural_sort(l): 
@@ -44,8 +43,6 @@ def frameDifferencing(previousFrameGray,currFrameGray,nextFrameGray):
 	# Thresholding the combined image using Otsu thresholding
 	threshFrameDifferencing = cv2.threshold(bitwiseAndFramDiff, 0, 255,
 		cv2.THRESH_BINARY | cv2.THRESH_OTSU)[1]
-	print(cv2.threshold(bitwiseAndFramDiff, 0, 255,
-		cv2.THRESH_BINARY | cv2.THRESH_OTSU)[0])
 	endTimeFrameDifferencing=time.time()
 	print("Frame Differencing--- %s seconds ---" % (endTimeFrameDifferencing - startTimeFrameDifferencing))
 	return threshFrameDifferencing

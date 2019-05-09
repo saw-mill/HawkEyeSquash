@@ -1,34 +1,35 @@
-import glob
 import time
 import cv2
 import math
 import numpy as np
 import matplotlib.pyplot as plt
-# from mpl_toolkits.mplot3d import Axes3D
 from Modules.foregroundExtraction import readyFrame, frameDifferencing, morphologicalOperations, natural_sort
 from Modules.ballDetection import findContours, sizeDetection, playerProximityDetection, regionDetection, courtBoundaryDetection
 
-startTimeReadingFrames = time.time()
+
+# Initializing
 datasetName = "Dataset1"
-# Location of dataset
-filenames = glob.glob(datasetName + "/*.jpg")
-
 if (datasetName == "Dataset1"):
-    totalFramesDataset = 560
+    startFrameDataset = 65
+    endFrameDataset = 560
 elif (datasetName == "Dataset2"):
-    totalFramesDataset = 194
+    startFrameDataset = 35
+    endFrameDataset = 215
+dictFrameNumberscX = {}
+dictFrameNumberscY = {}
+ballCandidatesPreviousFrame = list()
+trackingTime = list()
 
-# Reading each frame and storing it in a list
-frameList = [cv2.imread(frame) for frame in natural_sort(filenames)]
+#Reading frames
+startTimeReadingFrames = time.time()
+# Creating Video Object
+cap = cv2.VideoCapture('DatasetVideos/'+datasetName+'.mp4')
+cap.set(cv2.CAP_PROP_POS_FRAMES, startFrameDataset)
 endTimeReadingFrames = time.time()
 print("Reading Frames--- %s seconds ---" %
       (endTimeReadingFrames - startTimeReadingFrames))
 
-# Parsing through the frames
-dictFrameNumberscX = {}
-dictFrameNumberscY = {}
-ballCandidatesPreviousFrame = list()
-
+#Kalman Initialization
 startKalmanInitTime = time.time()
 
 mp = np.array((2, 1), np.float32)  # measurement
@@ -43,22 +44,25 @@ kalman.measurementNoiseCov = np.array([[1, 0], [0, 1]], np.float32) * 0.00003
 
 endKalmanInitTime = time.time()
 
-trackingTime = list()
-i = 0
-while i < (len(frameList)-2):
-    # cv2.imshow("Frame {}".format(i),frameList[i])
+i = 0 #Keeping track of the frame number
+while (cap.isOpened()):
+    print("######Start of Frame#####")
+    if(i == 0): # If first frame read 3 frames
+        ret1, previousFrame = cap.read()
+        ret2, currFrame = cap.read()
+        ret3, nextFrame = cap.read()
+    else: # Read just the next frame from the 2nd frame onwards
+        previousFrame = currFrame
+        currFrame = nextFrame
+        ret, nextFrame = cap.read()
+    print("Frame Number {}".format(i + 1))
 
-    # Storing three frames
-    previousFrame = frameList[i]
-    currFrame = frameList[i+1]
-    nextFrame = frameList[i + 2]
-
-    print("Frame Number {}".format(i+1))
     #
     #
     # FOREGROUND EXTRACTION
     #
     #
+
     startTimeForeGroundExtraction = time.time()
 
     # Readying the frames
@@ -72,7 +76,7 @@ while i < (len(frameList)-2):
     # Performing morphological operations
     final_image = morphologicalOperations(threshFrameDifferencing, 4, 4)
 
-    final_image = cv2.medianBlur(final_image,7)
+    # final_image = cv2.medianBlur(final_image, 7)
 
     # cv2.imshow('final image', final_image)
     endTimeForegroundExtraction = time.time()
@@ -84,6 +88,7 @@ while i < (len(frameList)-2):
     # BALL DETECTION
     #
     #
+
     startTimeBallDetection = time.time()
 
     # Finding contours in the frame
@@ -260,10 +265,9 @@ while i < (len(frameList)-2):
                                                     startKalmanPredTime)+(endKalmanInitTime-startKalmanInitTime)))
 
     # Print Ball Trajectory 2D Feature Image
-    if (((i + 1) % totalFramesDataset) == 0):
+    if (((i + 1) % endFrameDataset) == 0):
         print("Average Tracking Time: {}".format(
-            sum(trackingTime)/totalFramesDataset))
-        # print(dictFrameNumberscX)
+            sum(trackingTime)/endFrameDataset))
         keys = list(dictFrameNumberscX.keys())
         xvalues = list(dictFrameNumberscX.values())
         yvalues = list(dictFrameNumberscY.values())
@@ -305,6 +309,7 @@ while i < (len(frameList)-2):
         # plt.plot(keys, yvalues, 'g--', linewidth=2)
         # plt.show()
 
+    print("######End of Frame#####")
     i += 1  # increments the loop
 
     # Exits the loop when Esc is pressed, goes to previous frame when space pressed and goes to next frame when any other key is pressed
