@@ -18,7 +18,11 @@ elif (datasetName == "Dataset2"):
 dictFrameNumberscX = {}
 dictFrameNumberscY = {}
 ballCandidatesPreviousFrame = list()
+#Profiling Structures
 trackingTime = list()
+detectionTime = list()
+feTime = list()
+processTime = list()
 
 #Reading frames
 startTimeReadingFrames = time.time()
@@ -76,12 +80,13 @@ while (cap.isOpened()):
     # Performing morphological operations
     final_image = morphologicalOperations(threshFrameDifferencing, 4, 4)
 
-    # final_image = cv2.medianBlur(final_image, 7)
+    final_image = cv2.medianBlur(final_image, 7)
 
     # cv2.imshow('final image', final_image)
     endTimeForegroundExtraction = time.time()
     print("Foreground Extraction--- %s seconds ---" %
           (endTimeForegroundExtraction - startTimeForeGroundExtraction))
+    feTime.append(endTimeForegroundExtraction - startTimeForeGroundExtraction) #Profiling
 
     #
     #
@@ -114,7 +119,7 @@ while (cap.isOpened()):
     endTimeBallDetection = time.time()
     print("Ball Detection--- %s seconds ---" %
           (endTimeBallDetection - startTimeBallDetection))
-
+    detectionTime.append(endTimeBallDetection - startTimeBallDetection) #Profiling
     #
     #
     # BALL TRACKING
@@ -264,10 +269,18 @@ while (cap.isOpened()):
     print("Ball Tracking in --- %s seconds ---" % ((endKalmanPredTime -
                                                     startKalmanPredTime)+(endKalmanInitTime-startKalmanInitTime)))
 
+    processTime.append((endTimeForegroundExtraction - startTimeForeGroundExtraction)+(endTimeBallDetection - startTimeBallDetection)+((endKalmanPredTime -
+                         startKalmanPredTime)+(endKalmanInitTime-startKalmanInitTime))) #Profiling
     # Print Ball Trajectory 2D Feature Image
     if (((i + 1) % endFrameDataset) == 0):
+        print("Average FE Time: {}".format(
+            sum(feTime)/(endFrameDataset-startFrameDataset)))
+        print("Average Detection Time: {}".format(
+            sum(detectionTime)/(endFrameDataset-startFrameDataset)))
         print("Average Tracking Time: {}".format(
-            sum(trackingTime)/endFrameDataset))
+            sum(trackingTime) / (endFrameDataset - startFrameDataset)))
+        print("Average Total Process Time: {}".format(
+            sum(processTime) / (endFrameDataset - startFrameDataset)))
         keys = list(dictFrameNumberscX.keys())
         xvalues = list(dictFrameNumberscX.values())
         yvalues = list(dictFrameNumberscY.values())

@@ -7,7 +7,7 @@ from Modules.foregroundExtraction import readyFrame, frameDifferencing, morpholo
 from Modules.ballDetection import findContours, sizeDetection, playerProximityDetection, regionDetection, courtBoundaryDetection
 
 # Initializing
-datasetName = "Dataset1"
+datasetName = "Dataset2"
 if (datasetName == "Dataset1"):
     startFrameDataset = 65
     endFrameDataset = 560
@@ -17,7 +17,11 @@ elif (datasetName == "Dataset2"):
 dictFrameNumberscX = {}
 dictFrameNumberscY = {}
 ballCandidatesPreviousFrame = list()
+#Profiling Structures
 trackingTime = list()
+detectionTime = list()
+feTime = list()
+processTime = list()
 
 # Reading frames
 startTimeReadingFrames = time.time()
@@ -78,16 +82,16 @@ while (cap.isOpened()):
 
     # startTimeBlurringBinary = time.time()
     # # Blurring the binary image to get smooth shapes of objects
-    final_image = cv2.medianBlur(final_image, 7)
+    # final_image = cv2.medianBlur(final_image, 7)
     # endTimeBlurringBinary = time.time()
     # print("Final Blur--- %s seconds ---" %
     #       (endTimeBlurringBinary - startTimeBlurringBinary))
 
-    cv2.imshow('final_image',final_image)
+    # cv2.imshow('final_image',final_image)
     endTimeForegroundExtraction = time.time()
     print("Foreground Extraction--- %s seconds ---" %
           (endTimeForegroundExtraction - startTimeForeGroundExtraction))
-
+    feTime.append(endTimeForegroundExtraction - startTimeForeGroundExtraction) #Profiling
     #
     #
     # BALL DETECTION
@@ -121,7 +125,7 @@ while (cap.isOpened()):
     endTimeBallDetection = time.time()
     print("Ball Detection--- %s seconds ---" %
           (endTimeBallDetection - startTimeBallDetection))
-
+    detectionTime.append(endTimeBallDetection - startTimeBallDetection) #Profiling
     #
     #
     # BALL TRACKING
@@ -314,10 +318,17 @@ while (cap.isOpened()):
     print("Ball Tracking in --- %s seconds ---" %
           (endTimeExponentialPred-startTimeExponentialPred))
 
+    processTime.append((endTimeForegroundExtraction - startTimeForeGroundExtraction)+(endTimeBallDetection - startTimeBallDetection)+(endTimeExponentialPred-startTimeExponentialPred)) #Profiling
     # Print Ball Trajectory 2D Feature Image
     if (((i + 1) % endFrameDataset) == 0):
+        print("Average FE Time: {}".format(
+            sum(feTime)/(endFrameDataset-startFrameDataset)))
+        print("Average Detection Time: {}".format(
+            sum(detectionTime)/(endFrameDataset-startFrameDataset)))
         print("Average Tracking Time: {}".format(
-            sum(trackingTime)/endFrameDataset))
+            sum(trackingTime) / (endFrameDataset - startFrameDataset)))
+        print("Average Total Process Time: {}".format(
+            sum(processTime) / (endFrameDataset - startFrameDataset)))
         # print(dictFrameNumberscX)
         keys = list(dictFrameNumberscX.keys())
         xvalues = list(dictFrameNumberscX.values())
