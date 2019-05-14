@@ -2,31 +2,47 @@ import glob
 import time
 import cv2
 import math
-from Modules.foregroundExtraction import readyFrame, frameDifferencing, morphologicalOperations, natural_sort
+from Modules.foregroundExtraction import readyFrame, frameDifferencing, morphologicalOperations, natural_sort, convert480p
 from Modules.ballDetection import findContours, sizeDetection, playerProximityDetection
 
 startTimeReadingFrames = time.time()
-datasetName= "Dataset2"
-
+datasetName = "Dataset2"
+if (datasetName == "Dataset1"):
+    startFrameDataset = 65
+    endFrameDataset = 560
+elif (datasetName == "Dataset2"):
+    startFrameDataset = 35
+    endFrameDataset = 215
+dictFrameNumberscX = {}
+dictFrameNumberscY = {}
+ballCandidatesPreviousFrame = list()
+# Creating Video Object
 cap = cv2.VideoCapture('DatasetVideos/'+datasetName+'.mp4')
-cap.set(cv2.CAP_PROP_POS_FRAMES, 36)
+cap.set(cv2.CAP_PROP_POS_FRAMES, startFrameDataset)
+endTimeReadingFrames = time.time()
+print("Reading Frames--- %s seconds ---" %
+      (endTimeReadingFrames - startTimeReadingFrames))
 
 startTimeForeGroundExtraction = time.time()
 # Parsing through the frames
 
-ballCandidatesPreviousFrame = list()
-
 i = 0
-while(cap.isOpened()):
-# while i < (len(frameList)-2):
-    if(i==0):
+while (cap.isOpened()):
+    print("######Start of Frame#####")
+    if(i == 0): # If first frame read 3 frames
         ret1, previousFrame = cap.read()
         ret2, currFrame = cap.read()
         ret3, nextFrame = cap.read()
-    else:
+    else: # Read just the next frame from the 2nd frame onwards
         previousFrame = currFrame
         currFrame = nextFrame
-        ret, nextFrame = cap.read() 
+        ret, nextFrame = cap.read()
+    print("Frame Number {}".format(i + 1))
+
+    # Changing from 720p to 480p
+    previousFrame = convert480p(previousFrame)
+    currFrame = convert480p(currFrame)
+    nextFrame = convert480p(nextFrame)
 
     # Readying the frames
     previousFrameGray, currFrameGray, nextFrameGray = readyFrame(
@@ -74,30 +90,30 @@ while(cap.isOpened()):
     #         cv2.imshow('Candidate image', currFrame)
     ballCandidatesFilteredProximity = list()
 
-    if len(ballCandidatesPreviousFrame) > 0:
-        for cand in ballCandidatesFiltered:
-            ballCandFlag = False
-            for prevCand in ballCandidatesPreviousFrame:
-                dist = math.sqrt(math.pow((cand[0] - prevCand[0]), 2) + math.pow((cand[1] - prevCand[1]), 2))
-                if dist > 2 and dist < 70:
-                    ballCandFlag = True
-                else:
-                    continue
-            if ballCandFlag is True:
-                ballCandidatesFilteredProximity.append(cand)
-                cv2.putText(currFrame, "Ball Candidate", (cand[0] + 1, cand[1] + 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
-                cv2.drawContours(currFrame, [cand[3]], -1, (0, 255, 0), 2)
-            else:
-                cv2.putText(currFrame, "Not Ball Candidate", (cand[0] + 1, cand[1] + 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
-                cv2.drawContours(currFrame, [cand[3]], -1, (0, 255, 0), 2)
-        ballCandidatesPreviousFrame = ballCandidatesFilteredProximity.copy()
-        cv2.imshow('Candidate image', currFrame)
-    else:
-        for cand in ballCandidatesFiltered:
-            cv2.drawContours(currFrame, [cand[3]], -1, (0, 255, 0), 2)
-            cv2.putText(currFrame, "Ball Candidate", (cand[0] + 1, cand[1] + 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
-        ballCandidatesPreviousFrame = ballCandidatesFiltered.copy()
-        cv2.imshow('Candidate image', currFrame)
+    # if len(ballCandidatesPreviousFrame) > 0:
+    #     for cand in ballCandidatesFiltered:
+    #         ballCandFlag = False
+    #         for prevCand in ballCandidatesPreviousFrame:
+    #             dist = math.sqrt(math.pow((cand[0] - prevCand[0]), 2) + math.pow((cand[1] - prevCand[1]), 2))
+    #             if dist > 2 and dist < 70:
+    #                 ballCandFlag = True
+    #             else:
+    #                 continue
+    #         if ballCandFlag is True:
+    #             ballCandidatesFilteredProximity.append(cand)
+    #             cv2.putText(currFrame, "Ball Candidate", (cand[0] + 1, cand[1] + 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+    #             cv2.drawContours(currFrame, [cand[3]], -1, (0, 255, 0), 2)
+    #         else:
+    #             cv2.putText(currFrame, "Not Ball Candidate", (cand[0] + 1, cand[1] + 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+    #             cv2.drawContours(currFrame, [cand[3]], -1, (0, 255, 0), 2)
+    #     ballCandidatesPreviousFrame = ballCandidatesFilteredProximity.copy()
+    #     cv2.imshow('Candidate image', currFrame)
+    # else:
+    #     for cand in ballCandidatesFiltered:
+    #         cv2.drawContours(currFrame, [cand[3]], -1, (0, 255, 0), 2)
+    #         cv2.putText(currFrame, "Ball Candidate", (cand[0] + 1, cand[1] + 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+    #     ballCandidatesPreviousFrame = ballCandidatesFiltered.copy()
+    #     cv2.imshow('Candidate image', currFrame)
     
     i += 1  # increments the loop
 

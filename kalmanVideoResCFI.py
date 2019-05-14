@@ -3,7 +3,7 @@ import cv2
 import math
 import numpy as np
 import matplotlib.pyplot as plt
-from Modules.foregroundExtraction import readyFrame, frameDifferencing, morphologicalOperations, natural_sort
+from Modules.foregroundExtraction import readyFrame, frameDifferencing, morphologicalOperations, natural_sort, convert480p
 from Modules.ballDetection import findContours, sizeDetection, playerProximityDetection, regionDetection, courtBoundaryDetection
 
 
@@ -33,6 +33,14 @@ endTimeReadingFrames = time.time()
 print("Reading Frames--- %s seconds ---" %
       (endTimeReadingFrames - startTimeReadingFrames))
 
+width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
+height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
+print("size:", height, width)
+
+# cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+# cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+# print("size:", cap.get(cv2.CAP_PROP_FRAME_WIDTH), cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
 #Kalman Initialization
 startKalmanInitTime = time.time()
 
@@ -55,12 +63,17 @@ while (cap.isOpened()):
         ret1, previousFrame = cap.read()
         ret2, currFrame = cap.read()
         ret3, nextFrame = cap.read()
+        print(previousFrame.shape)
     else: # Read just the next frame from the 2nd frame onwards
         previousFrame = currFrame
         currFrame = nextFrame
         ret, nextFrame = cap.read()
     print("Frame Number {}".format(i + 1))
 
+    # Changing from 720p to 480p
+    previousFrame = convert480p(previousFrame)
+    currFrame = convert480p(currFrame)
+    nextFrame = convert480p(nextFrame)
     #
     #
     # FOREGROUND EXTRACTION

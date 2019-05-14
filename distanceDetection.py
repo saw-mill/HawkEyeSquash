@@ -2,14 +2,22 @@ import glob
 import time
 import cv2
 import math
-from Modules.foregroundExtraction import readyFrame, frameDifferencing, morphologicalOperations, natural_sort
+from Modules.foregroundExtraction import readyFrame, frameDifferencing, morphologicalOperations, natural_sort, convert480p
 
 startTimeReadingFrames = time.time()
-# Location of dataset
-filenames = glob.glob("Dataset1/*.jpg")
-
-# Reading each frame and storing it in a list
-frameList = [cv2.imread(frame) for frame in natural_sort(filenames)]
+datasetName = "Dataset2"
+if (datasetName == "Dataset1"):
+    startFrameDataset = 65
+    endFrameDataset = 560
+elif (datasetName == "Dataset2"):
+    startFrameDataset = 35
+    endFrameDataset = 215
+dictFrameNumberscX = {}
+dictFrameNumberscY = {}
+ballCandidatesPreviousFrame = list()
+# Creating Video Object
+cap = cv2.VideoCapture('DatasetVideos/'+datasetName+'.mp4')
+cap.set(cv2.CAP_PROP_POS_FRAMES, startFrameDataset)
 endTimeReadingFrames = time.time()
 print("Reading Frames--- %s seconds ---" %
       (endTimeReadingFrames - startTimeReadingFrames))
@@ -18,13 +26,22 @@ startTimeForeGroundExtraction = time.time()
 # Parsing through the frames
 
 i = 0
-while i < (len(frameList)-2):
-    # cv2.imshow("Frame {}".format(i),frameList[i])
+while (cap.isOpened()):
+    print("######Start of Frame#####")
+    if(i == 0): # If first frame read 3 frames
+        ret1, previousFrame = cap.read()
+        ret2, currFrame = cap.read()
+        ret3, nextFrame = cap.read()
+    else: # Read just the next frame from the 2nd frame onwards
+        previousFrame = currFrame
+        currFrame = nextFrame
+        ret, nextFrame = cap.read()
+    print("Frame Number {}".format(i + 1))
 
-    # Storing three frames
-    previousFrame = frameList[i]
-    currFrame = frameList[i+1]
-    nextFrame = frameList[i+2]
+    # Changing from 720p to 480p
+    previousFrame = convert480p(previousFrame)
+    currFrame = convert480p(currFrame)
+    nextFrame = convert480p(nextFrame)
 
     # Readying the frames
     previousFrameGray, currFrameGray, nextFrameGray = readyFrame(

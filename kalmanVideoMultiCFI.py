@@ -2,8 +2,9 @@ import time
 import cv2
 import math
 import numpy as np
+import multiprocessing
 import matplotlib.pyplot as plt
-from Modules.foregroundExtraction import readyFrame, frameDifferencing, morphologicalOperations, natural_sort
+from Modules.foregroundExtraction import readyFrame, frameDifferencing, morphologicalOperations, natural_sort, readySingleFrame
 from Modules.ballDetection import findContours, sizeDetection, playerProximityDetection, regionDetection, courtBoundaryDetection
 
 
@@ -70,8 +71,21 @@ while (cap.isOpened()):
     startTimeForeGroundExtraction = time.time()
 
     # Readying the frames
-    previousFrameGray, currFrameGray, nextFrameGray = readyFrame(
-        previousFrame, currFrame, nextFrame)
+    # previousFrameGray, currFrameGray, nextFrameGray = readyFrame(
+    #     previousFrame, currFrame, nextFrame)
+
+    frameList = [previousFrame,currFrame,nextFrame]
+
+    p = multiprocessing.Pool()
+
+    readyFrameList = p.map(readySingleFrame, frameList)
+    
+    previousFrameGray = readyFrameList[0]
+    currFrameGray = readyFrameList[1]
+    nextFrameGray = readyFrameList[2]
+    # p1 = multiprocessing.Process(target=readySingleFrame, args=(previousFrame, )) 
+    # p2 = multiprocessing.Process(target=readySingleFrame, args=(currFrame,))
+    # p3 = multiprocessing.Process(target=readySingleFrame, args=(nextFrame,)) 
 
     # Performing frame differencing
     threshFrameDifferencing = frameDifferencing(

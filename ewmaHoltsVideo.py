@@ -3,11 +3,11 @@ import cv2
 import math
 import numpy as np
 import matplotlib.pyplot as plt
-from Modules.foregroundExtraction import readyFrame, frameDifferencing, morphologicalOperations, natural_sort
+from Modules.foregroundExtraction import readyFrame, frameDifferencing, morphologicalOperations, natural_sort, convert480p
 from Modules.ballDetection import findContours, sizeDetection, playerProximityDetection, regionDetection, courtBoundaryDetection
 
 # Initializing
-datasetName = "Dataset2"
+datasetName = "Dataset1"
 if (datasetName == "Dataset1"):
     startFrameDataset = 65
     endFrameDataset = 560
@@ -59,6 +59,10 @@ while (cap.isOpened()):
         currFrame = nextFrame
         ret, nextFrame = cap.read()
     print("Frame Number {}".format(i + 1))
+
+    previousFrame = convert480p(previousFrame)
+    currFrame = convert480p(currFrame)
+    nextFrame = convert480p(nextFrame)
 
     #
     #

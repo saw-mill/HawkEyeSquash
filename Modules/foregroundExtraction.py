@@ -12,6 +12,17 @@ def natural_sort(l):
 	alphanum_key = lambda key: [ convert(c) for c in re.split('([0-9]+)', key) ] 
 	return sorted(l, key = alphanum_key)
 
+def readySingleFrame(rgbFrame):
+	greyGrame = cv2.cvtColor(rgbFrame, cv2.COLOR_BGR2GRAY)
+	blurredFrame = cv2.GaussianBlur(greyGrame, (7, 7), 0)
+	return blurredFrame
+
+def convert480p(image):
+	imageScale = 480 / image.shape[0]
+	dimensions = (int(image.shape[1] * imageScale),480)
+	resizedImage = cv2.resize(image, dimensions)
+	return resizedImage
+
 def readyFrame(previousFrame,currFrame,nextFrame):
 	'Converts the frame to Gray Scale and filters it'
 	startTimeReadyingFrame = time.time()

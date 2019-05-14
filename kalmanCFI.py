@@ -5,7 +5,7 @@ import math
 import numpy as np
 import matplotlib.pyplot as plt
 # from mpl_toolkits.mplot3d import Axes3D
-from Modules.foregroundExtraction import readyFrame, frameDifferencing, morphologicalOperations, natural_sort
+from Modules.foregroundExtraction import readyFrame, frameDifferencing, morphologicalOperations, natural_sort, convert480p
 from Modules.ballDetection import findContours, sizeDetection, playerProximityDetection, regionDetection, courtBoundaryDetection
 
 startTimeReadingFrames = time.time()
@@ -53,6 +53,11 @@ while i < (len(frameList)-2):
     currFrame = frameList[i+1]
     nextFrame = frameList[i + 2]
 
+    # # Changing from 720p to 480p
+    # previousFrame = convert480p(previousFrame)
+    # currFrame = convert480p(currFrame)
+    # nextFrame = convert480p(nextFrame)
+
     print("Frame Number {}".format(i+1))
     #
     #
@@ -72,7 +77,7 @@ while i < (len(frameList)-2):
     # Performing morphological operations
     final_image = morphologicalOperations(threshFrameDifferencing, 4, 4)
 
-    final_image = cv2.medianBlur(final_image,7)
+    # final_image = cv2.medianBlur(final_image,7)
 
     # cv2.imshow('final image', final_image)
     endTimeForegroundExtraction = time.time()
