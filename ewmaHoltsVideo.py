@@ -348,13 +348,13 @@ while (cap.isOpened()):
         plt.title('CFI with Double Exponential Y-Prediction')
         plt.plot(keys, yvalues, 'g--', linewidth=2)
         plt.show()
-
+        break
     print("######End of Frame#####")
     i += 1  # increments the loop
 
     # Exits the loop when Esc is pressed, goes to previous frame when space pressed and goes to next frame when any other key is pressed
     if(__debug__):
-        k = cv2.waitKey(0)
+        k = cv2.waitKey(40)
         if k == 27:
             break
         elif k == 32:

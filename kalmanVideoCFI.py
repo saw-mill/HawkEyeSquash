@@ -8,7 +8,7 @@ from Modules.ballDetection import findContours, sizeDetection, playerProximityDe
 
 
 # Initializing
-datasetName = "Dataset2"
+datasetName = "Dataset1"
 if (datasetName == "Dataset1"):
     startFrameDataset = 65
     endFrameDataset = 560
@@ -299,7 +299,7 @@ while (cap.isOpened()):
         # plt.axis([-20, 600, 25, 1000])
         # plt.axis([-20,210,50,900])
         plt.show()
-
+        break
         # scatter plot
 
         # print(dictFrameNumberscY)

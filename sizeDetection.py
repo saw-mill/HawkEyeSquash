@@ -4,7 +4,7 @@ import cv2
 from Modules.foregroundExtraction import readyFrame, frameDifferencing, morphologicalOperations, natural_sort,convert480p
 
 startTimeReadingFrames = time.time()
-datasetName = "Dataset2"
+datasetName = "Dataset1"
 if (datasetName == "Dataset1"):
     startFrameDataset = 65
     endFrameDataset = 560
@@ -60,7 +60,7 @@ while (cap.isOpened()):
         final_image_copy, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
     min_BallArea = 300
-    max_BallArea = 1500
+    max_BallArea = 1800
     min_PlayerArea = 10000
     min_IncompletePlayerArea = 1800
     

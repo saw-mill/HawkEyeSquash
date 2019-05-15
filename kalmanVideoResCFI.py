@@ -8,7 +8,7 @@ from Modules.ballDetection import findContours, sizeDetection, playerProximityDe
 
 
 # Initializing
-datasetName = "Dataset2"
+datasetName = "Dataset1"
 if (datasetName == "Dataset1"):
     startFrameDataset = 65
     endFrameDataset = 560
@@ -213,8 +213,8 @@ while (cap.isOpened()):
                 # print("Distance predact {}".format(distncePredAct))
 
                 cv2.drawContours(currFrame, [cand[3]], -1, (255, 0,), 2)
-                cv2.putText(currFrame, str(
-                    cand[2]), (cand[0] + 1, cand[1] + 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+                cv2.putText(currFrame, "A: "+str(
+                    cand[2])+" MD:"+str(cand[5]), (cand[0] + 1, cand[1] + 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
             if(__debug__):
                 cv2.imshow('Candidate image', currFrame)
 
@@ -262,8 +262,8 @@ while (cap.isOpened()):
                 dictFrameNumberscY[i+1] = corrected[1]
 
                 cv2.drawContours(currFrame, [cand[3]], -1, (255, 0,), 2)
-                cv2.putText(currFrame, str(
-                    cand[2]), (cand[0] + 1, cand[1] + 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+                cv2.putText(currFrame, "A:"+str(
+                    cand[2])+" MD:"+str(cand[5]), (cand[0] + 1, cand[1] + 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
             if(__debug__):
                 cv2.imshow('Candidate image', currFrame)
         # If no candidate detected, predict only
@@ -313,6 +313,7 @@ while (cap.isOpened()):
         # plt.axis([-20,210,50,900])
         plt.show()
 
+        break
         # scatter plot
 
         # print(dictFrameNumberscY)
