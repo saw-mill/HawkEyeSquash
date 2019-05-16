@@ -4,11 +4,11 @@ import math
 import numpy as np
 import matplotlib.pyplot as plt
 from Modules.foregroundExtraction import readyFrame, frameDifferencing, morphologicalOperations, natural_sort, convert480p
-from Modules.ballDetection import findContours, sizeDetection, playerProximityDetection, regionDetection, courtBoundaryDetection
+from Modules.ballDetectionRes import findContours, sizeDetection, playerProximityDetection, regionDetection, courtBoundaryDetection
 
 
 # Initializing
-datasetName = "Dataset1"
+datasetName = "Dataset2"
 if (datasetName == "Dataset1"):
     startFrameDataset = 65
     endFrameDataset = 560
@@ -58,7 +58,7 @@ endKalmanInitTime = time.time()
 
 i = 0 #Keeping track of the frame number
 while (cap.isOpened()):
-    print("######Start of Frame#####")
+    print("######Start of Frame {}#####".format(i+1))
     if(i == 0): # If first frame read 3 frames
         ret1, previousFrame = cap.read()
         ret2, currFrame = cap.read()
@@ -68,7 +68,7 @@ while (cap.isOpened()):
         previousFrame = currFrame
         currFrame = nextFrame
         ret, nextFrame = cap.read()
-    print("Frame Number {}".format(i + 1))
+    # print("Frame Number {}".format(i + 1))
 
     # Changing from 720p to 480p
     previousFrame = convert480p(previousFrame)
@@ -336,7 +336,7 @@ while (cap.isOpened()):
         # plt.plot(keys, yvalues, 'g--', linewidth=2)
         # plt.show()
 
-    print("######End of Frame#####")
+    print("######End of Frame##### {}".format(i+1))
     i += 1  # increments the loop
 
     # Exits the loop when Esc is pressed, goes to previous frame when space pressed and goes to next frame when any other key is pressed

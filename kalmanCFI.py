@@ -287,7 +287,7 @@ while i < (len(frameList)-2):
         # plt.axis([-20, 600, 25, 1000])
         # plt.axis([-20,210,50,900])
         plt.show()
-
+        break
         # scatter plot
 
         # print(dictFrameNumberscY)

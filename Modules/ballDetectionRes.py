@@ -12,10 +12,10 @@ def findContours(inputFrame):
 
 def sizeDetection(contours, currFrame,frameNumber):
         startTimeSizeDetection = time.time()
-        min_BallArea = 355
-        max_BallArea = 1800
+        min_BallArea = 340 #340 for d2
+        max_BallArea = 1500
         min_PlayerArea = 10000
-        min_IncompletePlayerArea = 1800
+        min_IncompletePlayerArea = 1500
 
         ballCandidates = list()
         playerCadidates = list()
@@ -49,17 +49,17 @@ def courtBoundaryDetection(ballCandidates, playerCadidates, incompletePlayerCand
         playerCadidatesFilteredBoundary = list()
         incompletePlayerCandidatesFilteredBoundary = list()
         for cand in ballCandidates:
-                if (cand[0] <= 145 or cand[0] > 1085):
+                if (cand[0] <= 140 or cand[0] > 725):
                         continue
                 else:
                         ballCandidatesFilteredBoundary.append(cand)
         for playercand in playerCadidates:
-                if (playercand[0] <= 145 or playercand[0] > 1085):
+                if (playercand[0] <= 140 or playercand[0] > 725):
                         continue
                 else:
                         playerCadidatesFilteredBoundary.append(playercand)
         for incompletecand in incompletePlayerCandidates:
-                if (incompletecand[0] <= 145 or incompletecand[0] > 1085):
+                if (incompletecand[0] <= 140 or incompletecand[0] > 725):
                         continue
                 else:
                         incompletePlayerCandidatesFilteredBoundary.append(incompletecand)
@@ -71,7 +71,7 @@ def courtBoundaryDetection(ballCandidates, playerCadidates, incompletePlayerCand
 def playerProximityDetection(ballCandidates, playerCadidates, incompletePlayerCandidates, currFrame):
         startTimePlayerProximity = time.time()
         ballCandidatesFiltered = list()
-        min_BallDistance = 100
+        min_BallDistance = 80
 
         if not ballCandidates:
                 print("No ball Candidates")

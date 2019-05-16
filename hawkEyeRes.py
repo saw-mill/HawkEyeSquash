@@ -2,11 +2,11 @@ import glob
 import time
 import cv2
 import math
-from Modules.foregroundExtraction import readyFrame, frameDifferencing, morphologicalOperations, natural_sort
-from Modules.ballDetection import findContours, sizeDetection, playerProximityDetection, regionDetection, courtBoundaryDetection
+from Modules.foregroundExtraction import readyFrame, frameDifferencing, morphologicalOperations, natural_sort, convert480p
+from Modules.ballDetectionRes import findContours, sizeDetection, playerProximityDetection, regionDetection, courtBoundaryDetection
 
 startTimeReadingFrames = time.time()
-datasetName = "Dataset2"
+datasetName = "Dataset1"
 if (datasetName == "Dataset1"):
     startFrameDataset = 65
     endFrameDataset = 560
@@ -39,6 +39,11 @@ while (cap.isOpened()):
         ret, nextFrame = cap.read()
     print("Frame Number {}".format(i + 1))
 
+    # Changing from 720p to 480p
+    previousFrame = convert480p(previousFrame)
+    currFrame = convert480p(currFrame)
+    nextFrame = convert480p(nextFrame)
+
     #
     # 
     # FOREGROUND EXTRACTION
@@ -55,7 +60,7 @@ while (cap.isOpened()):
         previousFrameGray, currFrameGray, nextFrameGray)
 
     # Performing morphological operations
-    img_erosion = morphologicalOperations(threshFrameDifferencing, 4, 4)
+    final_image = morphologicalOperations(threshFrameDifferencing, 4, 4)
 
     startTimeBlurringBinary = time.time()
     # Blurring the binary image to get smooth shapes of objects
@@ -96,14 +101,14 @@ while (cap.isOpened()):
     endTimeBallDetection = time.time()
     print("Ball Detection--- %s seconds ---" % (endTimeBallDetection - startTimeBallDetection))
 
-    # Drawing and Displaying contours around the candidates 
-    for cand in ballCandidatesFilteredProximity:
-        if not cand:
-            cv2.imshow('Candidate image', currFrame)
-        else:
+    if( len(ballCandidatesFilteredProximity) > 0):
+        for cand in ballCandidatesFilteredProximity:
             cv2.drawContours(currFrame, [cand[3]], -1, (255, 0,), 2)
-            cv2.putText(currFrame, str(cand[0])+","+str(cand[1]),(cand[0]+1, cand[1]+1),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+            cv2.putText(currFrame, "A:"+str(
+                    cand[2]) + " MD:" + str(cand[5]), (cand[0] + 1, cand[1] + 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
             cv2.imshow('Candidate image', currFrame)
+    else:
+        cv2.imshow('Candidate image', currFrame)
 
     i += 1  # increments the loop
 
