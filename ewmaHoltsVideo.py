@@ -4,16 +4,25 @@ import math
 import numpy as np
 import matplotlib.pyplot as plt
 from Modules.foregroundExtraction import readyFrame, frameDifferencing, morphologicalOperations, natural_sort, convert480p
-from Modules.ballDetection import findContours, sizeDetection, playerProximityDetection, regionDetection, courtBoundaryDetection
+from Modules.ballDetectionRes import findContours, sizeDetection, playerProximityDetection, regionDetection, courtBoundaryDetection
 
 # Initializing
-datasetName = "Dataset1"
+datasetName = "Dataset3"
 if (datasetName == "Dataset1"):
     startFrameDataset = 65
     endFrameDataset = 560
 elif (datasetName == "Dataset2"):
     startFrameDataset = 35
     endFrameDataset = 215
+elif (datasetName == "Dataset3"):
+    startFrameDataset = 10
+    endFrameDataset = 140
+elif (datasetName == "Dataset4"):
+    startFrameDataset = 1
+    endFrameDataset = 330
+elif (datasetName == "Dataset5"):
+    startFrameDataset = 1
+    endFrameDataset = 200
 dictFrameNumberscX = {}
 dictFrameNumberscY = {}
 ballCandidatesPreviousFrame = list()
@@ -114,8 +123,7 @@ while (cap.isOpened()):
         contours, currFrame, i)
 
     # Removing candidates outside the Court Boundary in Dataset2
-    if (datasetName == 'Dataset2'):
-        ballCandidates, playerCadidates, incompletePlayerCandidates = courtBoundaryDetection(
+    ballCandidates, playerCadidates, incompletePlayerCandidates = courtBoundaryDetection(datasetName,
             ballCandidates, playerCadidates, incompletePlayerCandidates, currFrame)
 
     # Removing Candidates that are close to the Players
@@ -347,6 +355,7 @@ while (cap.isOpened()):
         plt.ylabel('Candidate Y-Coordinate Double Exponential')
         plt.title('CFI with Double Exponential Y-Prediction')
         plt.plot(keys, yvalues, 'g--', linewidth=2)
+        plt.axis([-10,150,50,400])
         plt.show()
         break
     print("######End of Frame#####")

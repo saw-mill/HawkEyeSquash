@@ -6,13 +6,37 @@ from Modules.foregroundExtraction import readyFrame, frameDifferencing, morpholo
 from Modules.ballDetectionRes import findContours, sizeDetection, playerProximityDetection, regionDetection, courtBoundaryDetection
 
 startTimeReadingFrames = time.time()
-datasetName = "Dataset1"
+datasetName = "Dataset7"
 if (datasetName == "Dataset1"):
     startFrameDataset = 65
     endFrameDataset = 560
 elif (datasetName == "Dataset2"):
     startFrameDataset = 35
     endFrameDataset = 215
+elif (datasetName == "Dataset3"):
+    startFrameDataset = 10
+    endFrameDataset = 140
+elif (datasetName == "Dataset4"):
+    startFrameDataset = 1
+    endFrameDataset = 330
+elif (datasetName == "Dataset5"):
+    startFrameDataset = 0
+    endFrameDataset = 150
+elif (datasetName == "Dataset6"):
+    startFrameDataset = 1
+    endFrameDataset = 190
+elif (datasetName == "Dataset7"):
+    startFrameDataset = 0
+    endFrameDataset = 220
+elif (datasetName == "Dataset8"):
+    startFrameDataset = 0
+    endFrameDataset = 240
+elif (datasetName == "Dataset9"):
+    startFrameDataset = 0
+    endFrameDataset = 200
+elif (datasetName == "Dataset10"):
+    startFrameDataset = 0
+    endFrameDataset = 230
 dictFrameNumberscX = {}
 dictFrameNumberscY = {}
 ballCandidatesPreviousFrame = list()
@@ -80,17 +104,16 @@ while (cap.isOpened()):
     startTimeBallDetection =time.time()
 
     # Making a copy of pre-processed image frame
-    final_image_copy = final_image.copy()
+    # final_image_copy = final_image.copy()
 
     # Finding contours in the frame
-    contours, hier = findContours(final_image_copy)
+    contours, hier = findContours(final_image)
 
     # Separating candidates based on size
     ballCandidates, playerCadidates, incompletePlayerCandidates = sizeDetection(contours, currFrame,i)
 
-    # Removing candidates outside the Court Boundary in Dataset2 
-    if (datasetName == 'Dataset2'):
-        ballCandidates, playerCadidates, incompletePlayerCandidates = courtBoundaryDetection(ballCandidates,playerCadidates,incompletePlayerCandidates,currFrame)
+    # Removing candidates outside the Court Boundary
+    ballCandidates, playerCadidates, incompletePlayerCandidates = courtBoundaryDetection(datasetName,ballCandidates,playerCadidates,incompletePlayerCandidates,currFrame)
     
     # Removing Candidates that are close to the Players
     ballCandidatesFiltered = playerProximityDetection(ballCandidates, playerCadidates, incompletePlayerCandidates, currFrame)
@@ -104,8 +127,8 @@ while (cap.isOpened()):
     if( len(ballCandidatesFilteredProximity) > 0):
         for cand in ballCandidatesFilteredProximity:
             cv2.drawContours(currFrame, [cand[3]], -1, (255, 0,), 2)
-            cv2.putText(currFrame, "A:"+str(
-                    cand[2]) + " MD:" + str(cand[5]), (cand[0] + 1, cand[1] + 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+            # cv2.putText(currFrame, "A:"+str(
+            #         cand[2]) + " MD:" + str(cand[5]), (cand[0] + 1, cand[1] + 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
             cv2.imshow('Candidate image', currFrame)
     else:
         cv2.imshow('Candidate image', currFrame)

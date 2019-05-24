@@ -8,7 +8,7 @@ from Modules.ballDetection import findContours, sizeDetection, playerProximityDe
 
 
 # Initializing
-datasetName = "Dataset1"
+datasetName = "Dataset2"
 if (datasetName == "Dataset1"):
     startFrameDataset = 65
     endFrameDataset = 560
@@ -264,7 +264,7 @@ while (cap.isOpened()):
     endKalmanPredTime = time.time()
 
     trackingTime.append((endKalmanPredTime -
-                         startKalmanPredTime)+(endKalmanInitTime-startKalmanInitTime))
+                         startKalmanPredTime))
 
     print("Ball Tracking in --- %s seconds ---" % ((endKalmanPredTime -
                                                     startKalmanPredTime)+(endKalmanInitTime-startKalmanInitTime)))
@@ -278,7 +278,7 @@ while (cap.isOpened()):
         print("Average Detection Time: {}".format(
             sum(detectionTime)/(endFrameDataset-startFrameDataset)))
         print("Average Tracking Time: {}".format(
-            sum(trackingTime) / (endFrameDataset - startFrameDataset)))
+            sum(trackingTime) / (endFrameDataset - startFrameDataset)+(endKalmanInitTime-startKalmanInitTime)))
         print("Average Total Process Time: {}".format(
             sum(processTime) / (endFrameDataset - startFrameDataset)))
         keys = list(dictFrameNumberscX.keys())

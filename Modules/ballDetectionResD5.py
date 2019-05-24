@@ -12,9 +12,9 @@ def findContours(inputFrame):
 
 def sizeDetection(contours, currFrame,frameNumber):
         startTimeSizeDetection = time.time()
-        min_BallArea = 340 #340 for d2, 355 for d3, 280 for d4
-        max_BallArea = 1500 #1200 for d4
-        min_PlayerArea = 4000 #4000 for d4
+        min_BallArea = 500 #340 for d2, 355 for d3, 280 for d4
+        max_BallArea = 1500 #1200 for di d2 d3 d4
+        min_PlayerArea = 4000
         min_IncompletePlayerArea = 1500
 
         ballCandidates = list()
@@ -48,9 +48,9 @@ def courtBoundaryDetection(datasetName, ballCandidates, playerCadidates, incompl
         if (datasetName == "Dataset1"):
                 courtBoundaryleft = 68
                 courtBoundaryRight = 835
-        elif (datasetName == "Dataset2" or datasetName == "Dataset6" or datasetName == "Dataset7" or datasetName == "Dataset8" or datasetName == "Dataset9" or datasetName == "Dataset10"):
-                courtBoundaryleft = 104 #d7 104 740
-                courtBoundaryRight = 740
+        elif (datasetName == "Dataset2"):
+                courtBoundaryleft = 140
+                courtBoundaryRight = 725
         elif (datasetName == "Dataset3"):
                 courtBoundaryleft = 145
                 courtBoundaryRight = 709
@@ -58,8 +58,8 @@ def courtBoundaryDetection(datasetName, ballCandidates, playerCadidates, incompl
                 courtBoundaryleft = 110
                 courtBoundaryRight = 745
         elif (datasetName == "Dataset5"):
-                courtBoundaryleft = 161
-                courtBoundaryRight = 695
+                courtBoundaryleft = 8
+                courtBoundaryRight = 835
         ballCandidatesFilteredBoundary = list()
         playerCadidatesFilteredBoundary = list()
         incompletePlayerCandidatesFilteredBoundary = list()
@@ -86,7 +86,7 @@ def courtBoundaryDetection(datasetName, ballCandidates, playerCadidates, incompl
 def playerProximityDetection(ballCandidates, playerCadidates, incompletePlayerCandidates, currFrame):
         startTimePlayerProximity = time.time()
         ballCandidatesFiltered = list()
-        min_BallDistance = 80 #80 for d1 d2, 75 for d3, 92 for d4
+        min_BallDistance = 125 #80 for d1 d2, 75 for d3, 92 fo3 d4
 
         if not ballCandidates:
                 print("No ball Candidates")
@@ -141,7 +141,7 @@ def regionDetection(ballCandidatesFiltered, ballCandidatesPreviousFrame,currFram
                         for prevCand in ballCandidatesPreviousFrame:
                                 dist = math.sqrt(math.pow((cand[0] - prevCand[0]), 2) + math.pow((cand[1] - prevCand[1]), 2))
                                 dist = round(dist,2)
-                                if dist > 2 and dist < 70:
+                                if dist > 2 and dist < 100:
                                         ballCandFlag = True
                                 else:
                                         continue

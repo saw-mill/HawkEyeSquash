@@ -2,16 +2,25 @@ import glob
 import time
 import cv2
 import math
-from Modules.foregroundExtraction import readyFrame, frameDifferencing, morphologicalOperations, natural_sort, convert480p
+from Modules.foregroundExtractionD5 import readyFrame, frameDifferencing, morphologicalOperations, natural_sort, convert480p
 
 startTimeReadingFrames = time.time()
-datasetName = "Dataset2"
+datasetName = "Dataset5"
 if (datasetName == "Dataset1"):
     startFrameDataset = 65
     endFrameDataset = 560
 elif (datasetName == "Dataset2"):
     startFrameDataset = 35
     endFrameDataset = 215
+elif (datasetName == "Dataset3"):
+    startFrameDataset = 10
+    endFrameDataset = 140
+elif (datasetName == "Dataset4"):
+    startFrameDataset = 0
+    endFrameDataset = 550
+elif (datasetName == "Dataset5"):
+    startFrameDataset = 1
+    endFrameDataset = 200
 dictFrameNumberscX = {}
 dictFrameNumberscY = {}
 ballCandidatesPreviousFrame = list()
@@ -52,11 +61,11 @@ while (cap.isOpened()):
         previousFrameGray, currFrameGray, nextFrameGray)
 
     # Performing morphological operations
-    img_erosion = morphologicalOperations(threshFrameDifferencing, 4, 4)
+    final_image = morphologicalOperations(threshFrameDifferencing, 6, 4)
 
     startTimeBlurringBinary = time.time()
     # Blurring the binary image to get smooth shapes of objects
-    final_image = cv2.medianBlur(img_erosion, 7)
+    # final_image = cv2.medianBlur(img_erosion, 7)
     endTimeBlurringBinary = time.time()
     print("Final Blur--- %s seconds ---" %
           (endTimeBlurringBinary - startTimeBlurringBinary))
@@ -68,10 +77,10 @@ while (cap.isOpened()):
     contours, hier = cv2.findContours(
         final_image_copy, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-    min_BallArea = 300
-    max_BallArea = 1800
-    min_PlayerArea = 10000
-    min_IncompletePlayerArea = 1800
+    min_BallArea = 500
+    max_BallArea = 1500
+    min_PlayerArea = 4000
+    min_IncompletePlayerArea = 1500
     min_BallDistance = 95
     
     ballCandidates = list()

@@ -2,17 +2,26 @@ import glob
 import time
 import cv2
 import math
-from Modules.foregroundExtraction import readyFrame, frameDifferencing, morphologicalOperations, natural_sort, convert480p
-from Modules.ballDetection import findContours, sizeDetection, playerProximityDetection
+from Modules.foregroundExtractionD5 import readyFrame, frameDifferencing, morphologicalOperations, natural_sort, convert480p
+from Modules.ballDetectionRes import findContours, sizeDetection, playerProximityDetection, courtBoundaryDetection
 
 startTimeReadingFrames = time.time()
-datasetName = "Dataset2"
+datasetName = "Dataset5"
 if (datasetName == "Dataset1"):
     startFrameDataset = 65
     endFrameDataset = 560
 elif (datasetName == "Dataset2"):
     startFrameDataset = 35
     endFrameDataset = 215
+elif (datasetName == "Dataset3"):
+    startFrameDataset = 10
+    endFrameDataset = 140
+elif (datasetName == "Dataset4"):
+    startFrameDataset = 1
+    endFrameDataset = 330
+elif (datasetName == "Dataset5"):
+    startFrameDataset = 1
+    endFrameDataset = 200
 dictFrameNumberscX = {}
 dictFrameNumberscY = {}
 ballCandidatesPreviousFrame = list()
@@ -53,7 +62,7 @@ while (cap.isOpened()):
         previousFrameGray, currFrameGray, nextFrameGray)
 
     # Performing morphological operations
-    final_image = morphologicalOperations(threshFrameDifferencing, 4, 4)
+    final_image = morphologicalOperations(threshFrameDifferencing, 6, 4)
 
     startTimeBlurringBinary = time.time()
     # Blurring the binary image to get smooth shapes of objects
@@ -71,6 +80,8 @@ while (cap.isOpened()):
 
     ballCandidates, playerCadidates, incompletePlayerCandidates = sizeDetection(contours, currFrame,i)
     
+    ballCandidates, playerCadidates, incompletePlayerCandidates = courtBoundaryDetection(datasetName,ballCandidates,playerCadidates,incompletePlayerCandidates,currFrame)
+
     ballCandidatesFiltered = playerProximityDetection(ballCandidates, playerCadidates, incompletePlayerCandidates, currFrame)
 
     if (len(ballCandidatesFiltered) > 0):

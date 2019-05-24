@@ -13,6 +13,9 @@ if (datasetName == "Dataset1"):
 elif (datasetName == "Dataset2"):
     startFrameDataset = 35
     endFrameDataset = 215
+elif (datasetName == "Dataset3"):
+    startFrameDataset = 10
+    endFrameDataset = 140
 dictFrameNumberscX = {}
 dictFrameNumberscY = {}
 ballCandidatesPreviousFrame = list()
@@ -108,13 +111,13 @@ while (cap.isOpened()):
     print("Player Candidates: %d" % len(playerCadidatesFilteredBoundary))
     print("Incomplete Player Candidate: %d" % len(incompletePlayerCandidatesFilteredBoundary))
 
-    for cand in ballCandidatesFilteredBoundary:
-        if not cand:
-            cv2.imshow('Candidate image', currFrame)
-        else:
+    if(len(ballCandidatesFilteredBoundary)>0):
+        for cand in ballCandidatesFilteredBoundary:
             cv2.drawContours(currFrame, [cand[3]], -1, (255, 0,), 2)
             cv2.putText(currFrame, str(cand[0])+","+str(cand[1]),(cand[0]+1, cand[1]+1),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
             cv2.imshow('Candidate image', currFrame)
+    else:
+        cv2.imshow('Candidate image', currFrame)
 
     i += 1  # increments the loop
 

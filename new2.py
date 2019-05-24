@@ -1,11 +1,11 @@
 import time
 import cv2
 import matplotlib.pyplot as plt
-from Modules.foregroundExtraction import readyFrame, frameDifferencing, morphologicalOperations, natural_sort,convert480p
-from Modules.ballDetectionRes import findContours, sizeDetection, playerProximityDetection, regionDetection, courtBoundaryDetection
+from Modules.foregroundExtractionD5 import readyFrame, frameDifferencing, morphologicalOperations, natural_sort,convert480p
+from Modules.ballDetectionResD5 import findContours, sizeDetection, playerProximityDetection, regionDetection, courtBoundaryDetection
 
 startTimeReadingFrames = time.time()
-datasetName = "Dataset9"
+datasetName = "Dataset5"
 if (datasetName == "Dataset1"):
     startFrameDataset = 65
     endFrameDataset = 560
@@ -19,23 +19,8 @@ elif (datasetName == "Dataset4"):
     startFrameDataset = 1
     endFrameDataset = 330
 elif (datasetName == "Dataset5"):
-    startFrameDataset = 0
-    endFrameDataset = 150
-elif (datasetName == "Dataset6"):
     startFrameDataset = 1
-    endFrameDataset = 190
-elif (datasetName == "Dataset7"):
-    startFrameDataset = 0
-    endFrameDataset = 220
-elif (datasetName == "Dataset8"):
-    startFrameDataset = 1
-    endFrameDataset = 240
-elif (datasetName == "Dataset9"):
-    startFrameDataset = 0
-    endFrameDataset = 204
-elif (datasetName == "Dataset10"):
-    startFrameDataset = 0
-    endFrameDataset = 230
+    endFrameDataset = 200
 dictFrameNumberscX = {}
 dictFrameNumberscY = {}
 ballCandidatesPreviousFrame = list()
@@ -82,7 +67,7 @@ while (cap.isOpened()):
         previousFrameGray, currFrameGray, nextFrameGray)
 
     # Performing morphological operations
-    final_image = morphologicalOperations(threshFrameDifferencing, 4, 4)
+    final_image = morphologicalOperations(threshFrameDifferencing, 6, 4)
 
     # final_image = cv2.medianBlur(final_image,7)
 
@@ -132,16 +117,15 @@ while (cap.isOpened()):
         dictFrameNumberscY.get(i+1).append(cand[1])
 
     # Drawing and Displaying contours around the candidates
-    if (len(ballCandidatesFilteredProximity) > 0):
-        for cand in ballCandidatesFilteredProximity:
+    for cand in ballCandidatesFilteredProximity:
+        if not cand:
+            cv2.imshow('Candidate image', currFrame)
+        else:
             cv2.drawContours(currFrame, [cand[3]], -1, (255, 0,), 2)
-            cv2.putText(currFrame, "A:"+str(
-                    cand[2])+" MD:"+str(cand[5]), (cand[0] + 1, cand[1] + 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+            cv2.putText(currFrame, str(cand[0]) + "," + str(cand[1]), (cand[0] + 1,
+                                                                       cand[1] + 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
             if(__debug__):
                 cv2.imshow('Candidate image', currFrame)
-    else:
-        if(__debug__):
-            cv2.imshow('Candidate image', currFrame)
 
     if (((i + 1) % endFrameDataset) == 0):
         print(dictFrameNumberscX)
@@ -171,7 +155,7 @@ while (cap.isOpened()):
                 plt.ylabel('Candidate Y-Coordinate')
                 plt.title("Candidate Feature Image Y-coordinate")
                 # plt.axis([-20, 600, 25, 1000])
-                # plt.axis([-10,150,50,400])
+                plt.axis([-10,220,-250,650])
         plt.show()
 
     i += 1  # increments the loop

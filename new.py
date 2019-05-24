@@ -3,12 +3,12 @@ import cv2
 import math
 import numpy as np
 import matplotlib.pyplot as plt
-from Modules.foregroundExtraction import readyFrame, frameDifferencing, morphologicalOperations, natural_sort, convert480p
-from Modules.ballDetectionRes import findContours, sizeDetection, playerProximityDetection, regionDetection, courtBoundaryDetection
+from Modules.foregroundExtractionD5 import readyFrame, frameDifferencing, morphologicalOperations, natural_sort, convert480p
+from Modules.ballDetectionResD5 import findContours, sizeDetection, playerProximityDetection, regionDetection, courtBoundaryDetection
 
 
 # Initializing
-datasetName = "Dataset10"
+datasetName = "Dataset5"
 if (datasetName == "Dataset1"):
     startFrameDataset = 65
     endFrameDataset = 560
@@ -24,21 +24,6 @@ elif (datasetName == "Dataset4"):
 elif (datasetName == "Dataset5"):
     startFrameDataset = 1
     endFrameDataset = 200
-elif (datasetName == "Dataset6"):
-    startFrameDataset = 0
-    endFrameDataset = 190
-elif (datasetName == "Dataset7"):
-    startFrameDataset = 0
-    endFrameDataset = 220
-elif (datasetName == "Dataset8"):
-    startFrameDataset = 0
-    endFrameDataset = 240
-elif (datasetName == "Dataset9"):
-    startFrameDataset = 0
-    endFrameDataset = 200
-elif (datasetName == "Dataset10"):
-    startFrameDataset = 0
-    endFrameDataset = 230
 dictFrameNumberscX = {}
 dictFrameNumberscY = {}
 ballCandidatesPreviousFrame = list()
@@ -115,7 +100,7 @@ while (cap.isOpened()):
         previousFrameGray, currFrameGray, nextFrameGray)
 
     # Performing morphological operations
-    final_image = morphologicalOperations(threshFrameDifferencing, 4, 4)
+    final_image = morphologicalOperations(threshFrameDifferencing, 6, 4)
 
     # final_image = cv2.medianBlur(final_image, 7)
 
@@ -334,7 +319,7 @@ while (cap.isOpened()):
         plt.title('CFI with Kalman Y Prediction')
         plt.plot(keys, yvalues, 'g--', linewidth=2)
         # plt.axis([-20, 600, 25, 1000])
-        # plt.axis([-10,150,50,400])
+        plt.axis([-10,220,-250,650])
         plt.show()
 
         break
