@@ -7,7 +7,7 @@ from Modules.foregroundExtraction import readyFrame, frameDifferencing, morpholo
 from Modules.ballDetectionRes import findContours, sizeDetection, playerProximityDetection, regionDetection, courtBoundaryDetection
 
 # Initializing
-datasetName = "Dataset3"
+datasetName = "Dataset6"
 if (datasetName == "Dataset1"):
     startFrameDataset = 65
     endFrameDataset = 560
@@ -23,6 +23,21 @@ elif (datasetName == "Dataset4"):
 elif (datasetName == "Dataset5"):
     startFrameDataset = 1
     endFrameDataset = 200
+elif (datasetName == "Dataset6"):
+    startFrameDataset = 0
+    endFrameDataset = 180
+elif (datasetName == "Dataset7"):
+    startFrameDataset = 0
+    endFrameDataset = 220
+elif (datasetName == "Dataset8"):
+    startFrameDataset = 0
+    endFrameDataset = 240
+elif (datasetName == "Dataset9"):
+    startFrameDataset = 0
+    endFrameDataset = 200
+elif (datasetName == "Dataset10"):
+    startFrameDataset = 0
+    endFrameDataset = 230
 dictFrameNumberscX = {}
 dictFrameNumberscY = {}
 ballCandidatesPreviousFrame = list()
@@ -58,7 +73,8 @@ betaYcoord = 0.05
 
 i = 0
 while (cap.isOpened()):
-    print("######Start of Frame#####")
+    print("######Start of Frame{}#####".format(i + 1))
+    startTimeProcess = time.time()
     if(i == 0):  # If first frame read 3 frames
         ret1, previousFrame = cap.read()
         ret2, currFrame = cap.read()
@@ -330,7 +346,11 @@ while (cap.isOpened()):
     print("Ball Tracking in --- %s seconds ---" %
           (endTimeExponentialPred-startTimeExponentialPred))
 
-    processTime.append((endTimeForegroundExtraction - startTimeForeGroundExtraction)+(endTimeBallDetection - startTimeBallDetection)+(endTimeExponentialPred-startTimeExponentialPred)) #Profiling
+    endTimeProcess = time.time()
+    processTime.append(endTimeProcess - startTimeProcess)  #Profiling
+    
+    print("Total Process in --- %s seconds ---" %
+          (endTimeProcess-startTimeProcess))
     # Print Ball Trajectory 2D Feature Image
     if (((i + 1) % endFrameDataset) == 0):
         print("Average FE Time: {}".format(
@@ -355,7 +375,7 @@ while (cap.isOpened()):
         plt.ylabel('Candidate Y-Coordinate Double Exponential')
         plt.title('CFI with Double Exponential Y-Prediction')
         plt.plot(keys, yvalues, 'g--', linewidth=2)
-        plt.axis([-10,150,50,400])
+        plt.axis([-10,250,20,650])
         plt.show()
         break
     print("######End of Frame#####")

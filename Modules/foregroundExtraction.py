@@ -46,9 +46,9 @@ def frameDifferencing(previousFrameGray,currFrameGray,nextFrameGray):
 	startTimeFrameDifferencing=time.time()
 	# Performing frame differencing
 	frame_diff_curr_previous= cv2.absdiff(previousFrameGray,currFrameGray)
-	frame_diff_next_curr= cv2.absdiff(currFrameGray,nextFrameGray)
+	frame_diff_next_curr = cv2.absdiff(currFrameGray, nextFrameGray)
 	# Combining the differential images using an AND operation
-	bitwiseAndFramDiff= cv2.bitwise_and(frame_diff_curr_previous,frame_diff_next_curr)
+	bitwiseAndFramDiff = cv2.bitwise_and(frame_diff_curr_previous, frame_diff_next_curr)
 	# plt.hist(bitwiseAndFramDiff.ravel(),256,[0,256])
 	# plt.show()
 	# Thresholding the combined image using Otsu thresholding

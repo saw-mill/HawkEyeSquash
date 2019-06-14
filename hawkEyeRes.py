@@ -6,7 +6,7 @@ from Modules.foregroundExtraction import readyFrame, frameDifferencing, morpholo
 from Modules.ballDetectionRes import findContours, sizeDetection, playerProximityDetection, regionDetection, courtBoundaryDetection
 
 startTimeReadingFrames = time.time()
-datasetName = "Dataset7"
+datasetName = "Dataset1"
 if (datasetName == "Dataset1"):
     startFrameDataset = 65
     endFrameDataset = 560

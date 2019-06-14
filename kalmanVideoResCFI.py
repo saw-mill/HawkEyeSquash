@@ -8,7 +8,7 @@ from Modules.ballDetectionRes import findContours, sizeDetection, playerProximit
 
 
 # Initializing
-datasetName = "Dataset10"
+datasetName = "Dataset6"
 if (datasetName == "Dataset1"):
     startFrameDataset = 65
     endFrameDataset = 560
@@ -26,7 +26,7 @@ elif (datasetName == "Dataset5"):
     endFrameDataset = 200
 elif (datasetName == "Dataset6"):
     startFrameDataset = 0
-    endFrameDataset = 190
+    endFrameDataset = 180
 elif (datasetName == "Dataset7"):
     startFrameDataset = 0
     endFrameDataset = 220
@@ -62,6 +62,9 @@ width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
 height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
 print("size:", height, width)
 
+fps = cap.get(cv2.CAP_PROP_FPS)
+print("FPS: ",fps)
+
 # cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
 # cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 # print("size:", cap.get(cv2.CAP_PROP_FRAME_WIDTH), cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
@@ -82,7 +85,8 @@ kalman.measurementNoiseCov = np.array([[1, 0], [0, 1]], np.float32) * 0.00003
 endKalmanInitTime = time.time()
 i = 0 #Keeping track of the frame number
 while (cap.isOpened()):
-    print("######Start of Frame {}#####".format(i+1))
+    print("######Start of Frame {}#####".format(i + 1))
+    startTimeProcess = time.time()
     if(i == 0): # If first frame read 3 frames
         ret1, previousFrame = cap.read()
         ret2, currFrame = cap.read()
@@ -304,10 +308,10 @@ while (cap.isOpened()):
                          startKalmanPredTime)
 
     print("Ball Tracking in --- %s seconds ---" % ((endKalmanPredTime -
-                                                    startKalmanPredTime)+(endKalmanInitTime-startKalmanInitTime)))
+                                                    startKalmanPredTime)))
 
-    processTime.append((endTimeForegroundExtraction - startTimeForeGroundExtraction)+(endTimeBallDetection - startTimeBallDetection)+((endKalmanPredTime -
-                         startKalmanPredTime)+(endKalmanInitTime-startKalmanInitTime))) #Profiling
+    endTimeProcess = time.time()
+    processTime.append(endTimeProcess - startTimeProcess) #Profiling
     # Print Ball Trajectory 2D Feature Image
     if (((i + 1) % endFrameDataset) == 0):
         print("Average FE Time: {}".format(
@@ -315,7 +319,7 @@ while (cap.isOpened()):
         print("Average Detection Time: {}".format(
             sum(detectionTime)/(endFrameDataset-startFrameDataset)))
         print("Average Tracking Time: {}".format(
-            sum(trackingTime) / (endFrameDataset - startFrameDataset)+(endKalmanInitTime-startKalmanInitTime)))
+            (sum(trackingTime) / (endFrameDataset - startFrameDataset))+(endKalmanInitTime-startKalmanInitTime)))
         print("Average Total Process Time: {}".format(
             sum(processTime) / (endFrameDataset - startFrameDataset)))
         keys = list(dictFrameNumberscX.keys())
@@ -333,8 +337,7 @@ while (cap.isOpened()):
         plt.ylabel('Candidate Kalman Y-Coordinate')
         plt.title('CFI with Kalman Y Prediction')
         plt.plot(keys, yvalues, 'g--', linewidth=2)
-        # plt.axis([-20, 600, 25, 1000])
-        # plt.axis([-10,150,50,400])
+        # plt.axis([-10,250,20,650])
         plt.show()
 
         break
@@ -359,13 +362,13 @@ while (cap.isOpened()):
         # plt.title('CFI with Kalman Y Prediction')
         # plt.plot(keys, yvalues, 'g--', linewidth=2)
         # plt.show()
-    cv2.imwrite("Dataset3.png",currFrame)
+    # cv2.imwrite(datasetName+".png",currFrame)
     print("######End of Frame##### {}".format(i+1))
     i += 1  # increments the loop
 
     # Exits the loop when Esc is pressed, goes to previous frame when space pressed and goes to next frame when any other key is pressed
     if(__debug__):
-        k = cv2.waitKey(0)
+        k = cv2.waitKey(30)
         if k == 27:
             break
         elif k == 32:
