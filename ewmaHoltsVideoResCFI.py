@@ -1,22 +1,57 @@
-import glob
 import time
 import cv2
 import math
 import numpy as np
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-from Modules.foregroundExtraction import readyFrame, frameDifferencing, morphologicalOperations, natural_sort
-from Modules.ballDetection import findContours, sizeDetection, playerProximityDetection, regionDetection, courtBoundaryDetection
+from Modules.foregroundExtraction import readyFrame, frameDifferencing, morphologicalOperations, natural_sort, convert480p
+from Modules.ballDetectionRes import findContours, sizeDetection, playerProximityDetection, regionDetection, courtBoundaryDetection
 
+# Initializing
+datasetName = "Dataset5"
+if (datasetName == "Dataset1"):
+    startFrameDataset = 65
+    endFrameDataset = 560
+elif (datasetName == "Dataset2"):
+    startFrameDataset = 35
+    endFrameDataset = 215
+elif (datasetName == "Dataset3"):
+    startFrameDataset = 10
+    endFrameDataset = 140
+elif (datasetName == "Dataset4"):
+    startFrameDataset = 1
+    endFrameDataset = 330
+elif (datasetName == "Dataset5"):
+    startFrameDataset = 1
+    endFrameDataset = 200
+elif (datasetName == "Dataset6"):
+    startFrameDataset = 0
+    endFrameDataset = 180
+elif (datasetName == "Dataset7"):
+    startFrameDataset = 0
+    endFrameDataset = 220
+elif (datasetName == "Dataset8"):
+    startFrameDataset = 0
+    endFrameDataset = 240
+elif (datasetName == "Dataset9"):
+    startFrameDataset = 0
+    endFrameDataset = 200
+elif (datasetName == "Dataset10"):
+    startFrameDataset = 0
+    endFrameDataset = 230
+dictFrameNumberscX = {}
+dictFrameNumberscY = {}
+ballCandidatesPreviousFrame = list()
+#Profiling Structures
+trackingTime = list()
+detectionTime = list()
+feTime = list()
+processTime = list()
+
+# Reading frames
 startTimeReadingFrames = time.time()
-datasetName = "Dataset2"
-# Location of dataset
-filenames = glob.glob(datasetName + "/*.jpg")
-totalFramesDataset2 = 194
-totalFramesDataset1 = 560
-
-# Reading each frame and storing it in a list
-frameList = [cv2.imread(frame) for frame in natural_sort(filenames)]
+# Creating Video Object
+cap = cv2.VideoCapture('DatasetVideos/'+datasetName+'.mp4')
+cap.set(cv2.CAP_PROP_POS_FRAMES, startFrameDataset)
 endTimeReadingFrames = time.time()
 print("Reading Frames--- %s seconds ---" %
       (endTimeReadingFrames - startTimeReadingFrames))
@@ -36,18 +71,23 @@ betaXcoord = 0.01
 alphaYcoord = 0.95
 betaYcoord = 0.05
 
-dictFrameNumberscX = {}
-dictFrameNumberscY = {}
-ballCandidatesPreviousFrame = list()
-trackingTime = list()
 i = 0
-while i < (len(frameList)-2):
-    # cv2.imshow("Frame {}".format(i),frameList[i])
+while (cap.isOpened()):
+    print("######Start of Frame{}#####".format(i + 1))
+    startTimeProcess = time.time()
+    if(i == 0):  # If first frame read 3 frames
+        ret1, previousFrame = cap.read()
+        ret2, currFrame = cap.read()
+        ret3, nextFrame = cap.read()
+    else:  # Read just the next frame from the 2nd frame onwards
+        previousFrame = currFrame
+        currFrame = nextFrame
+        ret, nextFrame = cap.read()
+    print("Frame Number {}".format(i + 1))
 
-    # Storing three frames
-    previousFrame = frameList[i]
-    currFrame = frameList[i + 1]
-    nextFrame = frameList[i + 2]
+    previousFrame = convert480p(previousFrame)
+    currFrame = convert480p(currFrame)
+    nextFrame = convert480p(nextFrame)
 
     #
     #
@@ -67,17 +107,20 @@ while i < (len(frameList)-2):
     # Performing morphological operations
     final_image = morphologicalOperations(threshFrameDifferencing, 4, 4)
 
+    
+
     # startTimeBlurringBinary = time.time()
     # # Blurring the binary image to get smooth shapes of objects
-    # final_image = cv2.medianBlur(img_erosion, 7)
+    # final_image = cv2.medianBlur(final_image, 7)
     # endTimeBlurringBinary = time.time()
     # print("Final Blur--- %s seconds ---" %
     #       (endTimeBlurringBinary - startTimeBlurringBinary))
 
+    # cv2.imshow('final_image',final_image)
     endTimeForegroundExtraction = time.time()
     print("Foreground Extraction--- %s seconds ---" %
           (endTimeForegroundExtraction - startTimeForeGroundExtraction))
-
+    feTime.append(endTimeForegroundExtraction - startTimeForeGroundExtraction) #Profiling
     #
     #
     # BALL DETECTION
@@ -96,8 +139,7 @@ while i < (len(frameList)-2):
         contours, currFrame, i)
 
     # Removing candidates outside the Court Boundary in Dataset2
-    if (datasetName == 'Dataset2'):
-        ballCandidates, playerCadidates, incompletePlayerCandidates = courtBoundaryDetection(
+    ballCandidates, playerCadidates, incompletePlayerCandidates = courtBoundaryDetection(datasetName,
             ballCandidates, playerCadidates, incompletePlayerCandidates, currFrame)
 
     # Removing Candidates that are close to the Players
@@ -111,7 +153,7 @@ while i < (len(frameList)-2):
     endTimeBallDetection = time.time()
     print("Ball Detection--- %s seconds ---" %
           (endTimeBallDetection - startTimeBallDetection))
-
+    detectionTime.append(endTimeBallDetection - startTimeBallDetection) #Profiling
     #
     #
     # BALL TRACKING
@@ -149,14 +191,6 @@ while i < (len(frameList)-2):
         trendEstimateXcoord.append(betaXcoord*levelEstimateXcoord[i])
         levelEstimateYcoord.append(initstate[1])
         trendEstimateYcoord.append(betaYcoord*levelEstimateYcoord[i])
-        # print(levelEstimateXcoord)
-        # print(levelEstimateYcoord)
-        # print(trendEstimateXcoord)
-        # print(trendEstimateYcoord)
-        # print(predXcoord)
-        # print(predYcoord)
-        cv2.drawContours(
-            currFrame, [ballCandidatesFilteredProximity[0][3]], -1, (255, 0,), 2)
         if(__debug__):
             cv2.imshow('Candidate image', currFrame)
 
@@ -184,13 +218,6 @@ while i < (len(frameList)-2):
             # Appending prediction for plotting
             dictFrameNumberscX[i + 1] = predXcoord[i - 1]
             dictFrameNumberscY[i + 1] = predYcoord[i - 1]
-
-            # print(predXcoord)
-            # print(predYcoord)
-            # print(levelEstimateXcoord)
-            # print(levelEstimateYcoord)
-            # print(trendEstimateXcoord)
-            # print(trendEstimateYcoord)
 
             cv2.circle(currFrame, (int(predXcoord[i-1]), int(
                 predYcoord[i-1])), 10, (0, 255, 0), -1)
@@ -251,12 +278,7 @@ while i < (len(frameList)-2):
 
                 dictFrameNumberscX[i + 1] = predXcoord[i - 1]
                 dictFrameNumberscY[i + 1] = predYcoord[i - 1]
-                # print(predXcoord)
-                # print(predYcoord)
-                # print(levelEstimateXcoord)
-                # print(levelEstimateYcoord)
-                # print(trendEstimateXcoord)
-                # print(trendEstimateYcoord)
+
             # If a candidate close to the prediction, use that for estimation
             else:
                 x = minDistXcoord
@@ -273,12 +295,6 @@ while i < (len(frameList)-2):
 
                 dictFrameNumberscX[i + 1] = predXcoord[i - 1]
                 dictFrameNumberscY[i + 1] = predYcoord[i - 1]
-                # print(predXcoord)
-                # print(predYcoord)
-                # print(levelEstimateXcoord)
-                # print(levelEstimateYcoord)
-                # print(trendEstimateXcoord)
-                # print(trendEstimateYcoord)
 
                 cv2.circle(
                     currFrame, (int(predXcoord[i - 1]), int(predYcoord[i - 1])), 10, (0, 255, 0), -1)
@@ -314,12 +330,6 @@ while i < (len(frameList)-2):
 
             dictFrameNumberscX[i + 1] = predXcoord[i - 1]
             dictFrameNumberscY[i + 1] = predYcoord[i - 1]
-            # print(predXcoord)
-            # print(predYcoord)
-            # print(levelEstimateXcoord)
-            # print(levelEstimateYcoord)
-            # print(trendEstimateXcoord)
-            # print(trendEstimateYcoord)
 
             cv2.circle(
                 currFrame, (int(predXcoord[i-1]), int(predYcoord[i-1])), 10, (0, 0, 255), -1)
@@ -334,10 +344,21 @@ while i < (len(frameList)-2):
     print("Ball Tracking in --- %s seconds ---" %
           (endTimeExponentialPred-startTimeExponentialPred))
 
+    endTimeProcess = time.time()
+    processTime.append(endTimeProcess - startTimeProcess)  #Profiling
+    
+    print("Total Process in --- %s seconds ---" %
+          (endTimeProcess-startTimeProcess))
     # Print Ball Trajectory 2D Feature Image
-    if (((i + 1) % totalFramesDataset2) == 0):
+    if (((i + 1) % endFrameDataset) == 0):
+        print("Average FE Time: {}".format(
+            sum(feTime)/(endFrameDataset-startFrameDataset)))
+        print("Average Detection Time: {}".format(
+            sum(detectionTime)/(endFrameDataset-startFrameDataset)))
         print("Average Tracking Time: {}".format(
-            sum(trackingTime)/totalFramesDataset2))
+            sum(trackingTime) / (endFrameDataset - startFrameDataset)))
+        print("Average Total Process Time: {}".format(
+            sum(processTime) / (endFrameDataset - startFrameDataset)))
         # print(dictFrameNumberscX)
         keys = list(dictFrameNumberscX.keys())
         xvalues = list(dictFrameNumberscX.values())
@@ -353,12 +374,13 @@ while i < (len(frameList)-2):
         plt.title('CFI with Double Exponential Y-Prediction')
         plt.plot(keys, yvalues, 'g--', linewidth=2)
         plt.show()
-
+        break
+    print("######End of Frame#####")
     i += 1  # increments the loop
 
     # Exits the loop when Esc is pressed, goes to previous frame when space pressed and goes to next frame when any other key is pressed
     if(__debug__):
-        k = cv2.waitKey(0)
+        k = cv2.waitKey(40)
         if k == 27:
             break
         elif k == 32:

@@ -3,18 +3,42 @@ import cv2
 import math
 import numpy as np
 import matplotlib.pyplot as plt
-from Modules.foregroundExtraction import readyFrame, frameDifferencing, morphologicalOperations, natural_sort
-from Modules.ballDetection import findContours, sizeDetection, playerProximityDetection, regionDetection, courtBoundaryDetection
+from Modules.foregroundExtraction import readyFrame, frameDifferencing, morphologicalOperations, natural_sort, convert480p
+from Modules.ballDetectionRes import findContours, sizeDetection, playerProximityDetection, regionDetection, courtBoundaryDetection
 
 
 # Initializing
-datasetName = "Dataset2"
+datasetName = "Dataset6"
 if (datasetName == "Dataset1"):
     startFrameDataset = 65
     endFrameDataset = 560
 elif (datasetName == "Dataset2"):
     startFrameDataset = 35
     endFrameDataset = 215
+elif (datasetName == "Dataset3"):
+    startFrameDataset = 10
+    endFrameDataset = 140
+elif (datasetName == "Dataset4"):
+    startFrameDataset = 1
+    endFrameDataset = 330
+elif (datasetName == "Dataset5"):
+    startFrameDataset = 1
+    endFrameDataset = 200
+elif (datasetName == "Dataset6"):
+    startFrameDataset = 0
+    endFrameDataset = 180
+elif (datasetName == "Dataset7"):
+    startFrameDataset = 0
+    endFrameDataset = 220
+elif (datasetName == "Dataset8"):
+    startFrameDataset = 0
+    endFrameDataset = 240
+elif (datasetName == "Dataset9"):
+    startFrameDataset = 0
+    endFrameDataset = 200
+elif (datasetName == "Dataset10"):
+    startFrameDataset = 0
+    endFrameDataset = 230
 dictFrameNumberscX = {}
 dictFrameNumberscY = {}
 ballCandidatesPreviousFrame = list()
@@ -27,11 +51,23 @@ processTime = list()
 #Reading frames
 startTimeReadingFrames = time.time()
 # Creating Video Object
-cap = cv2.VideoCapture('DatasetVideos/'+datasetName+'.mp4')
+cap = cv2.VideoCapture('DatasetVideos/' + datasetName + '.mp4')
+print("Total Frames: {}".format(cap.get(cv2.CAP_PROP_FRAME_COUNT)))
 cap.set(cv2.CAP_PROP_POS_FRAMES, startFrameDataset)
 endTimeReadingFrames = time.time()
 print("Reading Frames--- %s seconds ---" %
       (endTimeReadingFrames - startTimeReadingFrames))
+
+width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
+height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
+print("size:", height, width)
+
+fps = cap.get(cv2.CAP_PROP_FPS)
+print("FPS: ",fps)
+
+# cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+# cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+# print("size:", cap.get(cv2.CAP_PROP_FRAME_WIDTH), cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
 #Kalman Initialization
 startKalmanInitTime = time.time()
@@ -47,20 +83,25 @@ kalman.processNoiseCov = np.array(
 kalman.measurementNoiseCov = np.array([[1, 0], [0, 1]], np.float32) * 0.00003
 
 endKalmanInitTime = time.time()
-
 i = 0 #Keeping track of the frame number
 while (cap.isOpened()):
-    print("######Start of Frame#####")
+    print("######Start of Frame {}#####".format(i + 1))
+    startTimeProcess = time.time()
     if(i == 0): # If first frame read 3 frames
         ret1, previousFrame = cap.read()
         ret2, currFrame = cap.read()
         ret3, nextFrame = cap.read()
+        print(previousFrame.shape)
     else: # Read just the next frame from the 2nd frame onwards
         previousFrame = currFrame
         currFrame = nextFrame
         ret, nextFrame = cap.read()
-    print("Frame Number {}".format(i + 1))
+    # print("Frame Number {}".format(i + 1))
 
+    # # Changing from 720p to 480p
+    # previousFrame = convert480p(previousFrame)
+    # currFrame = convert480p(currFrame)
+    # nextFrame = convert480p(nextFrame)
     #
     #
     # FOREGROUND EXTRACTION
@@ -104,8 +145,8 @@ while (cap.isOpened()):
         contours, currFrame, i)
 
     # Removing candidates outside the Court Boundary in Dataset2
-    if (datasetName == 'Dataset2'):
-        ballCandidates, playerCadidates, incompletePlayerCandidates = courtBoundaryDetection(
+    # if (datasetName == 'Dataset2' or datasetName == 'Dataset3'):
+    ballCandidates, playerCadidates, incompletePlayerCandidates = courtBoundaryDetection(datasetName,
             ballCandidates, playerCadidates, incompletePlayerCandidates, currFrame)
 
     # Removing Candidates that are close to the Players
@@ -200,8 +241,8 @@ while (cap.isOpened()):
                 # print("Distance predact {}".format(distncePredAct))
 
                 cv2.drawContours(currFrame, [cand[3]], -1, (255, 0,), 2)
-                cv2.putText(currFrame, str(
-                    cand[2]), (cand[0] + 1, cand[1] + 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+                cv2.putText(currFrame, "A: "+str(
+                    cand[2])+" MD:"+str(cand[5]), (cand[0] + 1, cand[1] + 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
             if(__debug__):
                 cv2.imshow('Candidate image', currFrame)
 
@@ -249,8 +290,8 @@ while (cap.isOpened()):
                 dictFrameNumberscY[i+1] = corrected[1]
 
                 cv2.drawContours(currFrame, [cand[3]], -1, (255, 0,), 2)
-                cv2.putText(currFrame, str(
-                    cand[2]), (cand[0] + 1, cand[1] + 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+                cv2.putText(currFrame, "A:"+str(
+                    cand[2])+" MD:"+str(cand[5]), (cand[0] + 1, cand[1] + 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
             if(__debug__):
                 cv2.imshow('Candidate image', currFrame)
         # If no candidate detected, predict only
@@ -263,14 +304,14 @@ while (cap.isOpened()):
 
     endKalmanPredTime = time.time()
 
-    trackingTime.append((endKalmanPredTime -
-                         startKalmanPredTime))
+    trackingTime.append(endKalmanPredTime -
+                         startKalmanPredTime)
 
     print("Ball Tracking in --- %s seconds ---" % ((endKalmanPredTime -
-                                                    startKalmanPredTime)+(endKalmanInitTime-startKalmanInitTime)))
+                                                    startKalmanPredTime)))
 
-    processTime.append((endTimeForegroundExtraction - startTimeForeGroundExtraction)+(endTimeBallDetection - startTimeBallDetection)+((endKalmanPredTime -
-                         startKalmanPredTime)+(endKalmanInitTime-startKalmanInitTime))) #Profiling
+    endTimeProcess = time.time()
+    processTime.append(endTimeProcess - startTimeProcess) #Profiling
     # Print Ball Trajectory 2D Feature Image
     if (((i + 1) % endFrameDataset) == 0):
         print("Average FE Time: {}".format(
@@ -278,7 +319,7 @@ while (cap.isOpened()):
         print("Average Detection Time: {}".format(
             sum(detectionTime)/(endFrameDataset-startFrameDataset)))
         print("Average Tracking Time: {}".format(
-            sum(trackingTime) / (endFrameDataset - startFrameDataset)+(endKalmanInitTime-startKalmanInitTime)))
+            (sum(trackingTime) / (endFrameDataset - startFrameDataset))+(endKalmanInitTime-startKalmanInitTime)))
         print("Average Total Process Time: {}".format(
             sum(processTime) / (endFrameDataset - startFrameDataset)))
         keys = list(dictFrameNumberscX.keys())
@@ -296,9 +337,9 @@ while (cap.isOpened()):
         plt.ylabel('Candidate Kalman Y-Coordinate')
         plt.title('CFI with Kalman Y Prediction')
         plt.plot(keys, yvalues, 'g--', linewidth=2)
-        # plt.axis([-20, 600, 25, 1000])
-        # plt.axis([-20,210,50,900])
+        # plt.axis([-10,250,20,650])
         plt.show()
+
         break
         # scatter plot
 
@@ -321,13 +362,13 @@ while (cap.isOpened()):
         # plt.title('CFI with Kalman Y Prediction')
         # plt.plot(keys, yvalues, 'g--', linewidth=2)
         # plt.show()
-
-    print("######End of Frame#####")
+    # cv2.imwrite(datasetName+".png",currFrame)
+    print("######End of Frame##### {}".format(i+1))
     i += 1  # increments the loop
 
     # Exits the loop when Esc is pressed, goes to previous frame when space pressed and goes to next frame when any other key is pressed
     if(__debug__):
-        k = cv2.waitKey(0)
+        k = cv2.waitKey(30)
         if k == 27:
             break
         elif k == 32:

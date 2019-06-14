@@ -7,7 +7,7 @@ from Modules.foregroundExtraction import readyFrame, frameDifferencing, morpholo
 from Modules.ballDetectionRes import findContours, sizeDetection, playerProximityDetection, regionDetection, courtBoundaryDetection
 
 # Initializing
-datasetName = "Dataset6"
+datasetName = "Dataset5"
 if (datasetName == "Dataset1"):
     startFrameDataset = 65
     endFrameDataset = 560
@@ -85,9 +85,9 @@ while (cap.isOpened()):
         ret, nextFrame = cap.read()
     print("Frame Number {}".format(i + 1))
 
-    previousFrame = convert480p(previousFrame)
-    currFrame = convert480p(currFrame)
-    nextFrame = convert480p(nextFrame)
+    # previousFrame = convert480p(previousFrame)
+    # currFrame = convert480p(currFrame)
+    # nextFrame = convert480p(nextFrame)
 
     #
     #
@@ -191,8 +191,6 @@ while (cap.isOpened()):
         trendEstimateXcoord.append(betaXcoord*levelEstimateXcoord[i])
         levelEstimateYcoord.append(initstate[1])
         trendEstimateYcoord.append(betaYcoord*levelEstimateYcoord[i])
-        cv2.drawContours(
-            currFrame, [ballCandidatesFilteredProximity[0][3]], -1, (255, 0,), 2)
         if(__debug__):
             cv2.imshow('Candidate image', currFrame)
 
@@ -375,7 +373,6 @@ while (cap.isOpened()):
         plt.ylabel('Candidate Y-Coordinate Double Exponential')
         plt.title('CFI with Double Exponential Y-Prediction')
         plt.plot(keys, yvalues, 'g--', linewidth=2)
-        plt.axis([-10,250,20,650])
         plt.show()
         break
     print("######End of Frame#####")
