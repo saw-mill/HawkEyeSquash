@@ -8,7 +8,7 @@ from Modules.ballDetectionRes import findContours, sizeDetection, playerProximit
 
 
 # Initializing
-datasetName = "Dataset6"
+datasetName = "Dataset10"
 if (datasetName == "Dataset1"):
     startFrameDataset = 65
     endFrameDataset = 560
@@ -337,7 +337,7 @@ while (cap.isOpened()):
         plt.ylabel('Candidate Kalman Y-Coordinate')
         plt.title('CFI with Kalman Y Prediction')
         plt.plot(keys, yvalues, 'g--', linewidth=2)
-        # plt.axis([-10,250,20,650])
+        # plt.axis([-10,250,-5,500])
         plt.show()
 
         break

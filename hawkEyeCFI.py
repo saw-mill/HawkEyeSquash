@@ -5,7 +5,7 @@ from Modules.foregroundExtraction import readyFrame, frameDifferencing, morpholo
 from Modules.ballDetectionRes import findContours, sizeDetection, playerProximityDetection, regionDetection, courtBoundaryDetection
 
 startTimeReadingFrames = time.time()
-datasetName = "Dataset2"
+datasetName = "Dataset10"
 if (datasetName == "Dataset1"):
     startFrameDataset = 65
     endFrameDataset = 560
@@ -22,20 +22,20 @@ elif (datasetName == "Dataset5"):
     startFrameDataset = 0
     endFrameDataset = 150
 elif (datasetName == "Dataset6"):
-    startFrameDataset = 1
-    endFrameDataset = 190
+    startFrameDataset = 0
+    endFrameDataset = 180
 elif (datasetName == "Dataset7"):
     startFrameDataset = 0
     endFrameDataset = 220
 elif (datasetName == "Dataset8"):
-    startFrameDataset = 1
+    startFrameDataset = 0
     endFrameDataset = 240
 elif (datasetName == "Dataset9"):
-    startFrameDataset = 1
-    endFrameDataset = 245
+    startFrameDataset = 0
+    endFrameDataset = 200
 elif (datasetName == "Dataset10"):
-    startFrameDataset = 1
-    endFrameDataset = 234
+    startFrameDataset = 0
+    endFrameDataset = 230
 dictFrameNumberscX = {}
 dictFrameNumberscY = {}
 ballCandidatesPreviousFrame = list()
@@ -170,7 +170,7 @@ while (cap.isOpened()):
                 plt.xlabel('Frame Number')
                 plt.ylabel('Candidate Y-Coordinate')
                 plt.title("Candidate Feature Image Y-coordinate")
-                # plt.axis([-10,250,20,650])
+                plt.axis([-10,250,-5,500])
         plt.show()
 
     i += 1  # increments the loop

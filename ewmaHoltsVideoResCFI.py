@@ -7,7 +7,7 @@ from Modules.foregroundExtraction import readyFrame, frameDifferencing, morpholo
 from Modules.ballDetectionRes import findContours, sizeDetection, playerProximityDetection, regionDetection, courtBoundaryDetection
 
 # Initializing
-datasetName = "Dataset5"
+datasetName = "Dataset10"
 if (datasetName == "Dataset1"):
     startFrameDataset = 65
     endFrameDataset = 560
@@ -373,6 +373,7 @@ while (cap.isOpened()):
         plt.ylabel('Candidate Y-Coordinate Double Exponential')
         plt.title('CFI with Double Exponential Y-Prediction')
         plt.plot(keys, yvalues, 'g--', linewidth=2)
+        # plt.axis([-10,250,-5,500])
         plt.show()
         break
     print("######End of Frame#####")
