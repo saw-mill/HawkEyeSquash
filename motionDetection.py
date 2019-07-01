@@ -2,15 +2,32 @@ import glob
 import time
 import cv2
 import math
-from Modules.foregroundExtraction import readyFrame, frameDifferencing, morphologicalOperations, natural_sort
-from Modules.ballDetection import findContours, sizeDetection, playerProximityDetection
+from Modules.foregroundExtractionD5 import readyFrame, frameDifferencing, morphologicalOperations, natural_sort, convert480p
+from Modules.ballDetectionRes import findContours, sizeDetection, playerProximityDetection, courtBoundaryDetection
 
 startTimeReadingFrames = time.time()
-# Location of dataset
-filenames = glob.glob("Dataset2/*.jpg")
-
-# Reading each frame and storing it in a list
-frameList = [cv2.imread(frame) for frame in natural_sort(filenames)]
+datasetName = "Dataset5"
+if (datasetName == "Dataset1"):
+    startFrameDataset = 65
+    endFrameDataset = 560
+elif (datasetName == "Dataset2"):
+    startFrameDataset = 35
+    endFrameDataset = 215
+elif (datasetName == "Dataset3"):
+    startFrameDataset = 10
+    endFrameDataset = 140
+elif (datasetName == "Dataset4"):
+    startFrameDataset = 1
+    endFrameDataset = 330
+elif (datasetName == "Dataset5"):
+    startFrameDataset = 1
+    endFrameDataset = 200
+dictFrameNumberscX = {}
+dictFrameNumberscY = {}
+ballCandidatesPreviousFrame = list()
+# Creating Video Object
+cap = cv2.VideoCapture('DatasetVideos/'+datasetName+'.mp4')
+cap.set(cv2.CAP_PROP_POS_FRAMES, startFrameDataset)
 endTimeReadingFrames = time.time()
 print("Reading Frames--- %s seconds ---" %
       (endTimeReadingFrames - startTimeReadingFrames))
@@ -18,16 +35,23 @@ print("Reading Frames--- %s seconds ---" %
 startTimeForeGroundExtraction = time.time()
 # Parsing through the frames
 
-ballCandidatesPreviousFrame = list()
-
 i = 0
-while i < (len(frameList)-2):
-    # cv2.imshow("Frame {}".format(i),frameList[i])
+while (cap.isOpened()):
+    print("######Start of Frame#####")
+    if(i == 0): # If first frame read 3 frames
+        ret1, previousFrame = cap.read()
+        ret2, currFrame = cap.read()
+        ret3, nextFrame = cap.read()
+    else: # Read just the next frame from the 2nd frame onwards
+        previousFrame = currFrame
+        currFrame = nextFrame
+        ret, nextFrame = cap.read()
+    print("Frame Number {}".format(i + 1))
 
-    # Storing three frames
-    previousFrame = frameList[i]
-    currFrame = frameList[i+1]
-    nextFrame = frameList[i+2]
+    # Changing from 720p to 480p
+    previousFrame = convert480p(previousFrame)
+    currFrame = convert480p(currFrame)
+    nextFrame = convert480p(nextFrame)
 
     # Readying the frames
     previousFrameGray, currFrameGray, nextFrameGray = readyFrame(
@@ -38,7 +62,7 @@ while i < (len(frameList)-2):
         previousFrameGray, currFrameGray, nextFrameGray)
 
     # Performing morphological operations
-    final_image = morphologicalOperations(threshFrameDifferencing, 4, 4)
+    final_image = morphologicalOperations(threshFrameDifferencing, 6, 4)
 
     startTimeBlurringBinary = time.time()
     # Blurring the binary image to get smooth shapes of objects
@@ -56,6 +80,8 @@ while i < (len(frameList)-2):
 
     ballCandidates, playerCadidates, incompletePlayerCandidates = sizeDetection(contours, currFrame,i)
     
+    ballCandidates, playerCadidates, incompletePlayerCandidates = courtBoundaryDetection(datasetName,ballCandidates,playerCadidates,incompletePlayerCandidates,currFrame)
+
     ballCandidatesFiltered = playerProximityDetection(ballCandidates, playerCadidates, incompletePlayerCandidates, currFrame)
 
     if (len(ballCandidatesFiltered) > 0):
@@ -73,7 +99,7 @@ while i < (len(frameList)-2):
     #     else:
     #         cv2.drawContours(currFrame, [cand[3]], -1, (255, 0,), 2)
     #         cv2.imshow('Candidate image', currFrame)
-    # ballCandidatesFilteredProximity = list()
+    ballCandidatesFilteredProximity = list()
 
     # if len(ballCandidatesPreviousFrame) > 0:
     #     for cand in ballCandidatesFiltered:

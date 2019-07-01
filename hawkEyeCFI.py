@@ -1,41 +1,71 @@
-import glob
 import time
 import cv2
-import math
 import matplotlib.pyplot as plt
-from Modules.foregroundExtraction import readyFrame, frameDifferencing, morphologicalOperations, natural_sort
-from Modules.ballDetection import findContours, sizeDetection, playerProximityDetection, regionDetection, courtBoundaryDetection
+from Modules.foregroundExtraction import readyFrame, frameDifferencing, morphologicalOperations, natural_sort,convert480p
+from Modules.ballDetectionRes import findContours, sizeDetection, playerProximityDetection, regionDetection, courtBoundaryDetection
 
 startTimeReadingFrames = time.time()
-datasetName = "Dataset2"
-# Location of dataset
-filenames = glob.glob(datasetName + "/*.jpg")
+datasetName = "Dataset10"
 if (datasetName == "Dataset1"):
-    totalFramesDataset = 560
+    startFrameDataset = 65
+    endFrameDataset = 560
 elif (datasetName == "Dataset2"):
-    totalFramesDataset = 194
-
-# Reading each frame and storing it in a list
-frameList = [cv2.imread(frame) for frame in natural_sort(filenames)]
+    startFrameDataset = 35
+    endFrameDataset = 215
+elif (datasetName == "Dataset3"):
+    startFrameDataset = 10
+    endFrameDataset = 140
+elif (datasetName == "Dataset4"):
+    startFrameDataset = 1
+    endFrameDataset = 330
+elif (datasetName == "Dataset5"):
+    startFrameDataset = 0
+    endFrameDataset = 150
+elif (datasetName == "Dataset6"):
+    startFrameDataset = 0
+    endFrameDataset = 180
+elif (datasetName == "Dataset7"):
+    startFrameDataset = 0
+    endFrameDataset = 220
+elif (datasetName == "Dataset8"):
+    startFrameDataset = 0
+    endFrameDataset = 240
+elif (datasetName == "Dataset9"):
+    startFrameDataset = 0
+    endFrameDataset = 200
+elif (datasetName == "Dataset10"):
+    startFrameDataset = 0
+    endFrameDataset = 230
+dictFrameNumberscX = {}
+dictFrameNumberscY = {}
+ballCandidatesPreviousFrame = list()
+# Creating Video Object
+cap = cv2.VideoCapture('DatasetVideos/'+datasetName+'.mp4')
+cap.set(cv2.CAP_PROP_POS_FRAMES, startFrameDataset)
 endTimeReadingFrames = time.time()
 print("Reading Frames--- %s seconds ---" %
       (endTimeReadingFrames - startTimeReadingFrames))
 
+startTimeForeGroundExtraction = time.time()
 # Parsing through the frames
-dictFrameNumberscX = {}
-dictFrameNumberscY = {}
 
-ballCandidatesPreviousFrame = list()
 i = 0
-while i < (len(frameList)-2):
-    # cv2.imshow("Frame {}".format(i),frameList[i])
+while (cap.isOpened()):
+    print("######Start of Frame#####")
+    if(i == 0): # If first frame read 3 frames
+        ret1, previousFrame = cap.read()
+        ret2, currFrame = cap.read()
+        ret3, nextFrame = cap.read()
+    else: # Read just the next frame from the 2nd frame onwards
+        previousFrame = currFrame
+        currFrame = nextFrame
+        ret, nextFrame = cap.read()
+    print("Frame Number {}".format(i + 1))
 
-    # Storing three frames
-    previousFrame = frameList[i]
-    currFrame = frameList[i+1]
-    nextFrame = frameList[i + 2]
-
-    print("Frame Number {}".format(i+1))
+    # Changing from 720p to 480p
+    previousFrame = convert480p(previousFrame)
+    currFrame = convert480p(currFrame)
+    nextFrame = convert480p(nextFrame)
     #
     #
     # FOREGROUND EXTRACTION
@@ -78,8 +108,8 @@ while i < (len(frameList)-2):
         contours, currFrame, i)
 
     # Removing candidates outside the Court Boundary in Dataset2
-    if (datasetName == 'Dataset2'):
-        ballCandidates, playerCadidates, incompletePlayerCandidates = courtBoundaryDetection(
+    # if (datasetName == 'Dataset2'):
+    ballCandidates, playerCadidates, incompletePlayerCandidates = courtBoundaryDetection(datasetName,
             ballCandidates, playerCadidates, incompletePlayerCandidates, currFrame)
 
     # Removing Candidates that are close to the Players
@@ -102,32 +132,19 @@ while i < (len(frameList)-2):
         dictFrameNumberscY.get(i+1).append(cand[1])
 
     # Drawing and Displaying contours around the candidates
-    for cand in ballCandidatesFilteredProximity:
-        if not cand:
-            cv2.imshow('Candidate image', currFrame)
-        else:
+    if (len(ballCandidatesFilteredProximity) > 0):
+        for cand in ballCandidatesFilteredProximity:
             cv2.drawContours(currFrame, [cand[3]], -1, (255, 0,), 2)
-            cv2.putText(currFrame, str(cand[0]) + "," + str(cand[1]), (cand[0] + 1,
-                                                                       cand[1] + 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+            cv2.putText(currFrame, "A:"+str(
+                    cand[2])+" MD:"+str(cand[5]), (cand[0] + 1, cand[1] + 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
             if(__debug__):
                 cv2.imshow('Candidate image', currFrame)
+    else:
+        if(__debug__):
+            cv2.imshow('Candidate image', currFrame)
 
-    if (((i + 1) % totalFramesDataset) == 0):
+    if (((i + 1) % endFrameDataset) == 0):
         print(dictFrameNumberscX)
-
-        for data_dict in dictFrameNumberscX.items():
-            print(data_dict)
-            x = data_dict[0]
-            values = data_dict[1]
-            for value in values:
-                # plt.subplot(1, 2, 1)
-                plt.scatter(x, value)
-                plt.xlabel('Frame Number')
-                plt.ylabel('Candidate X-Coordinate')
-                plt.title("Candidate Feature Image X-coordinate")
-                # plt.axis([-20, 600, 0, 1300])
-                plt.axis([-20, 210, 100, 1200])
-        plt.show()
 
         for data_dict in dictFrameNumberscY.items():
             print(data_dict)
@@ -139,8 +156,7 @@ while i < (len(frameList)-2):
                 plt.xlabel('Frame Number')
                 plt.ylabel('Candidate Y-Coordinate')
                 plt.title("Candidate Feature Image Y-coordinate")
-                # plt.axis([-20, 600, 25, 1000])
-                plt.axis([-20, 210, 50, 900])
+                plt.axis([-10,250,-5,500])
         plt.show()
 
     i += 1  # increments the loop

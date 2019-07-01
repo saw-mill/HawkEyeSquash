@@ -2,30 +2,48 @@ import glob
 import time
 import cv2
 import math
-from Modules.foregroundExtraction import readyFrame, frameDifferencing, morphologicalOperations, natural_sort
+from Modules.foregroundExtraction import readyFrame, frameDifferencing, morphologicalOperations, natural_sort, convert480p
 from Modules.ballDetection import findContours, sizeDetection, playerProximityDetection, regionDetection, courtBoundaryDetection
 
 startTimeReadingFrames = time.time()
-datasetName= "Dataset2"
-# Location of dataset
-filenames = glob.glob(datasetName+"/*.jpg")
+datasetName = "Dataset2"
+if (datasetName == "Dataset1"):
+    startFrameDataset = 65
+    endFrameDataset = 560
+elif (datasetName == "Dataset2"):
+    startFrameDataset = 35
+    endFrameDataset = 215
+elif (datasetName == "Dataset3"):
+    startFrameDataset = 10
+    endFrameDataset = 140
+dictFrameNumberscX = {}
+dictFrameNumberscY = {}
+ballCandidatesPreviousFrame = list()
 
-# Reading each frame and storing it in a list
-frameList = [cv2.imread(frame) for frame in natural_sort(filenames)]
+# Creating Video Object
+cap = cv2.VideoCapture('DatasetVideos/'+datasetName+'.mp4')
+cap.set(cv2.CAP_PROP_POS_FRAMES, startFrameDataset)
 endTimeReadingFrames = time.time()
 print("Reading Frames--- %s seconds ---" %
       (endTimeReadingFrames - startTimeReadingFrames))
 
-# Parsing through the frames
-ballCandidatesPreviousFrame = list()
 i = 0
-while i < (len(frameList)-2):
-    # cv2.imshow("Frame {}".format(i),frameList[i])
+while (cap.isOpened()):
+    print("######Start of Frame#####")
+    if(i == 0): # If first frame read 3 frames
+        ret1, previousFrame = cap.read()
+        ret2, currFrame = cap.read()
+        ret3, nextFrame = cap.read()
+    else: # Read just the next frame from the 2nd frame onwards
+        previousFrame = currFrame
+        currFrame = nextFrame
+        ret, nextFrame = cap.read()
+    print("Frame Number {}".format(i + 1))
 
-    # Storing three frames
-    previousFrame = frameList[i]
-    currFrame = frameList[i+1]
-    nextFrame = frameList[i+2]
+    # Changing from 720p to 480p
+    previousFrame = convert480p(previousFrame)
+    currFrame = convert480p(currFrame)
+    nextFrame = convert480p(nextFrame)
 
     #
     # 
@@ -93,13 +111,13 @@ while i < (len(frameList)-2):
     print("Player Candidates: %d" % len(playerCadidatesFilteredBoundary))
     print("Incomplete Player Candidate: %d" % len(incompletePlayerCandidatesFilteredBoundary))
 
-    for cand in ballCandidatesFilteredBoundary:
-        if not cand:
-            cv2.imshow('Candidate image', currFrame)
-        else:
+    if(len(ballCandidatesFilteredBoundary)>0):
+        for cand in ballCandidatesFilteredBoundary:
             cv2.drawContours(currFrame, [cand[3]], -1, (255, 0,), 2)
             cv2.putText(currFrame, str(cand[0])+","+str(cand[1]),(cand[0]+1, cand[1]+1),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
             cv2.imshow('Candidate image', currFrame)
+    else:
+        cv2.imshow('Candidate image', currFrame)
 
     i += 1  # increments the loop
 

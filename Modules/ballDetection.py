@@ -1,9 +1,6 @@
 import numpy as np
 import cv2
-import imutils
 import time
-from PIL import Image
-import re
 import math
 
 def findContours(inputFrame):
@@ -15,7 +12,7 @@ def findContours(inputFrame):
 
 def sizeDetection(contours, currFrame,frameNumber):
         startTimeSizeDetection = time.time()
-        min_BallArea = 300
+        min_BallArea = 355
         max_BallArea = 1800
         min_PlayerArea = 10000
         min_IncompletePlayerArea = 1800
@@ -111,7 +108,7 @@ def playerProximityDetection(ballCandidates, playerCadidates, incompletePlayerCa
                                 continue
                         minDist = round(minDist, 2)
                         if (minDist >= min_BallDistance):
-                                # cand.append(minDist) # Can remove this
+                                cand.append(minDist) # Can remove this
                                 # cand.append(minDistPoint) #Can remove this
                                 ballCandidatesFiltered.append(cand)
 
@@ -128,28 +125,30 @@ def regionDetection(ballCandidatesFiltered, ballCandidatesPreviousFrame,currFram
                         ballCandFlag = False
                         for prevCand in ballCandidatesPreviousFrame:
                                 dist = math.sqrt(math.pow((cand[0] - prevCand[0]), 2) + math.pow((cand[1] - prevCand[1]), 2))
-                                if dist > 5 and dist < 70:
+                                dist = round(dist,2)
+                                if dist > 2 and dist < 70:
                                         ballCandFlag = True
                                 else:
                                         continue
                         if ballCandFlag is True:
+                                cand.append(dist)
                                 ballCandidatesFilteredProximity.append(cand)
                                 # cv2.putText(currFrame, "Maybe", (cand[0] + 1, cand[1] + 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 150, 192), 2)
                                 # cv2.drawContours(currFrame, [cand[3]], -1, (255, 0,), 2)
                                 # cv2.imshow('Candidate image', currFrame)
                         else:
-                                cv2.imshow('Candidate image', currFrame)
+                                # cv2.imshow('Candidate image', currFrame)
                                 continue
                                 # cv2.putText(currFrame, "Not", (cand[0] + 1, cand[1] + 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 150, 192), 2)
                                 # cv2.imshow('Candidate image', currFrame)
-                ballCandidatesPreviousFrame = ballCandidatesFilteredProximity.copy()
+                ballCandidatesPreviousFrame = ballCandidatesFilteredProximity
         else:
-                for cand in ballCandidatesFiltered:
-                        ballCandidatesFilteredProximity.append(cand)
+                # for cand in ballCandidatesFiltered:
+                ballCandidatesFilteredProximity = ballCandidatesFiltered
                         # cv2.drawContours(currFrame, [cand[3]], -1, (255, 0,), 2)
                         # cv2.putText(currFrame, "Maybe", (cand[0] + 1, cand[1] + 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 150, 192), 2)
                         # cv2.imshow('Candidate image', currFrame)
-                ballCandidatesPreviousFrame = ballCandidatesFiltered.copy()
+                ballCandidatesPreviousFrame = ballCandidatesFiltered
         endTimeRegionDetection = time.time()
         print("Expected Region based filtering in--- %s seconds ---" % (endTimeRegionDetection - startTimeRegionDetection))
         print("Ball Candidates: %d" % len(ballCandidatesFilteredProximity))

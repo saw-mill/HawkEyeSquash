@@ -1,10 +1,9 @@
 import numpy as np
 import cv2
-import imutils
+# import imutils
 import time
-from PIL import Image
 import re
-from matplotlib import pyplot as plt
+# from matplotlib import pyplot as plt
 
 # Function to sort a list in natural manner
 def natural_sort(l): 
@@ -12,6 +11,17 @@ def natural_sort(l):
 	convert = lambda text: int(text) if text.isdigit() else text.lower() 
 	alphanum_key = lambda key: [ convert(c) for c in re.split('([0-9]+)', key) ] 
 	return sorted(l, key = alphanum_key)
+
+def readySingleFrame(rgbFrame):
+	greyGrame = cv2.cvtColor(rgbFrame, cv2.COLOR_BGR2GRAY)
+	blurredFrame = cv2.GaussianBlur(greyGrame, (7, 7), 0)
+	return blurredFrame
+
+def convert480p(image):
+	imageScale = 480 / image.shape[0]
+	dimensions = (int(image.shape[1] * imageScale),480)
+	resizedImage = cv2.resize(image, dimensions)
+	return resizedImage
 
 def readyFrame(previousFrame,currFrame,nextFrame):
 	'Converts the frame to Gray Scale and filters it'
@@ -36,16 +46,14 @@ def frameDifferencing(previousFrameGray,currFrameGray,nextFrameGray):
 	startTimeFrameDifferencing=time.time()
 	# Performing frame differencing
 	frame_diff_curr_previous= cv2.absdiff(previousFrameGray,currFrameGray)
-	frame_diff_next_curr= cv2.absdiff(currFrameGray,nextFrameGray)
+	frame_diff_next_curr = cv2.absdiff(currFrameGray, nextFrameGray)
 	# Combining the differential images using an AND operation
-	bitwiseAndFramDiff= cv2.bitwise_and(frame_diff_curr_previous,frame_diff_next_curr)
+	bitwiseAndFramDiff = cv2.bitwise_and(frame_diff_curr_previous, frame_diff_next_curr)
 	# plt.hist(bitwiseAndFramDiff.ravel(),256,[0,256])
 	# plt.show()
 	# Thresholding the combined image using Otsu thresholding
 	threshFrameDifferencing = cv2.threshold(bitwiseAndFramDiff, 0, 255,
 		cv2.THRESH_BINARY | cv2.THRESH_OTSU)[1]
-	print(cv2.threshold(bitwiseAndFramDiff, 0, 255,
-		cv2.THRESH_BINARY | cv2.THRESH_OTSU)[0])
 	endTimeFrameDifferencing=time.time()
 	print("Frame Differencing--- %s seconds ---" % (endTimeFrameDifferencing - startTimeFrameDifferencing))
 	return threshFrameDifferencing
