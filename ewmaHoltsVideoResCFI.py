@@ -363,11 +363,6 @@ while (cap.isOpened()):
         keys = list(dictFrameNumberscX.keys())
         xvalues = list(dictFrameNumberscX.values())
         yvalues = list(dictFrameNumberscY.values())
-        plt.xlabel('Frame Number')
-        plt.ylabel('Candidate X-Coordinate Double Exponential')
-        plt.title('CFI with Double Exponential X-Prediction')
-        plt.plot(keys, xvalues, 'r--', linewidth=2)
-        plt.show()
 
         plt.xlabel('Frame Number')
         plt.ylabel('Candidate Y-Coordinate Double Exponential')

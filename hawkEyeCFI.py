@@ -146,20 +146,6 @@ while (cap.isOpened()):
     if (((i + 1) % endFrameDataset) == 0):
         print(dictFrameNumberscX)
 
-        for data_dict in dictFrameNumberscX.items():
-            print(data_dict)
-            x = data_dict[0]
-            values = data_dict[1]
-            for value in values:
-                # plt.subplot(1, 2, 1)
-                plt.scatter(x, value)
-                plt.xlabel('Frame Number')
-                plt.ylabel('Candidate X-Coordinate')
-                plt.title("Candidate Feature Image X-coordinate")
-                # plt.axis([-20, 600, 0, 1300])
-                plt.axis([-20, 210, 100, 1200])
-        plt.show()
-
         for data_dict in dictFrameNumberscY.items():
             print(data_dict)
             x = data_dict[0]

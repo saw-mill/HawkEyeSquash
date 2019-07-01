@@ -25,19 +25,19 @@ elif (datasetName == "Dataset5"):
     startFrameDataset = 1
     endFrameDataset = 200
 elif (datasetName == "Dataset6"):
-    startFrameDataset = 0
+    startFrameDataset = 1
     endFrameDataset = 180
 elif (datasetName == "Dataset7"):
-    startFrameDataset = 0
+    startFrameDataset = 1
     endFrameDataset = 220
 elif (datasetName == "Dataset8"):
-    startFrameDataset = 0
+    startFrameDataset = 1
     endFrameDataset = 240
 elif (datasetName == "Dataset9"):
-    startFrameDataset = 0
+    startFrameDataset = 1
     endFrameDataset = 200
 elif (datasetName == "Dataset10"):
-    startFrameDataset = 0
+    startFrameDataset = 1
     endFrameDataset = 230
 dictFrameNumberscX = {}
 dictFrameNumberscY = {}
@@ -325,13 +325,6 @@ while (cap.isOpened()):
         keys = list(dictFrameNumberscX.keys())
         xvalues = list(dictFrameNumberscX.values())
         yvalues = list(dictFrameNumberscY.values())
-        plt.xlabel('Frame Number')
-        plt.ylabel('Candidate Kalman X-Coordinate')
-        plt.title('CFI with Kalman X Prediction')
-        plt.plot(keys, xvalues, 'r--', linewidth=2)
-        # plt.axis([-20, 600, 0, 1300])
-        # plt.axis([-20,210,100,1200])
-        plt.show()
 
         plt.xlabel('Frame Number')
         plt.ylabel('Candidate Kalman Y-Coordinate')
