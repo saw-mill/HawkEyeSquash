@@ -1,0 +1,11 @@
+Dataset,Number of frames,Frames with ball detected (),Frames with ball predicted (%)
+Dataset 1,560,79.47,20.53
+Dataset 2,215,87.45,12.55
+Dataset 3,140,70,30
+Dataset 4,330,74.85,25.15
+Dataset 5,210,28.58,71.42
+Dataset 6,180,75,25
+Dataset 7,220,77.73,22.27
+Dataset 8,240,76.67,23.33
+Dataset 9,245,73.47,26.53
+Dataset 10,230,74.49,25.21

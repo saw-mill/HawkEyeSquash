@@ -47,13 +47,17 @@ def frameDifferencing(previousFrameGray,currFrameGray,nextFrameGray):
 	# Performing frame differencing
 	frame_diff_curr_previous= cv2.absdiff(previousFrameGray,currFrameGray)
 	frame_diff_next_curr = cv2.absdiff(currFrameGray, nextFrameGray)
+	cv2.imwrite('framediff1.png', frame_diff_curr_previous)
+	cv2.imwrite('framediff2.png',frame_diff_next_curr)
 	# Combining the differential images using an AND operation
 	bitwiseAndFramDiff = cv2.bitwise_and(frame_diff_curr_previous, frame_diff_next_curr)
+	cv2.imwrite('booleanAND.png',bitwiseAndFramDiff)
 	# plt.hist(bitwiseAndFramDiff.ravel(),256,[0,256])
 	# plt.show()
 	# Thresholding the combined image using Otsu thresholding
 	threshFrameDifferencing = cv2.threshold(bitwiseAndFramDiff, 0, 255,
 		cv2.THRESH_BINARY | cv2.THRESH_OTSU)[1]
+	cv2.imwrite('thresholded.png',threshFrameDifferencing)
 	endTimeFrameDifferencing=time.time()
 	print("Frame Differencing--- %s seconds ---" % (endTimeFrameDifferencing - startTimeFrameDifferencing))
 	return threshFrameDifferencing
@@ -68,8 +72,10 @@ def morphologicalOperations(threshFrameDifferencing, dilationIterations, erosion
 	kernelErosion = np.ones((3,3), np.uint8)
 	# Performing morphological dilation to join disconnected components in the binary image
 	img_dilation = cv2.dilate(threshFrameDifferencing, kernelDilation, iterations=dilationIterations)
+	cv2.imwrite('dilation.png',img_dilation)
 	# Performing morphological erosion to reduce thickness of objects and remove small white noise if present
 	img_erosion = cv2.erode(img_dilation, kernelErosion, iterations=erosionIterations)
+	cv2.imwrite('erosion.png',img_erosion)
 	endTimeMorphologicalOperations=time.time()
 	print("Morphological Operations--- %s seconds ---" % (endTimeMorphologicalOperations - startTimeMorphologicalOperations))
 	return img_erosion

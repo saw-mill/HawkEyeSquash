@@ -8,7 +8,7 @@ from Modules.ballDetectionRes import findContours, sizeDetection, playerProximit
 
 
 # Initializing
-datasetName = "Dataset10"
+datasetName = "Dataset2"
 if (datasetName == "Dataset1"):
     startFrameDataset = 65
     endFrameDataset = 560
@@ -23,7 +23,7 @@ elif (datasetName == "Dataset4"):
     endFrameDataset = 330
 elif (datasetName == "Dataset5"):
     startFrameDataset = 1
-    endFrameDataset = 200
+    endFrameDataset = 212
 elif (datasetName == "Dataset6"):
     startFrameDataset = 1
     endFrameDataset = 180
@@ -35,10 +35,13 @@ elif (datasetName == "Dataset8"):
     endFrameDataset = 240
 elif (datasetName == "Dataset9"):
     startFrameDataset = 1
-    endFrameDataset = 200
+    endFrameDataset = 246
 elif (datasetName == "Dataset10"):
     startFrameDataset = 1
     endFrameDataset = 230
+elif (datasetName == "Dataset11"):
+    startFrameDataset = 1
+    endFrameDataset = 220
 dictFrameNumberscX = {}
 dictFrameNumberscY = {}
 ballCandidatesPreviousFrame = list()
@@ -47,6 +50,8 @@ trackingTime = list()
 detectionTime = list()
 feTime = list()
 processTime = list()
+detectionCount = 0
+predictionCount = 0 
 
 #Reading frames
 startTimeReadingFrames = time.time()
@@ -96,7 +101,7 @@ while (cap.isOpened()):
         previousFrame = currFrame
         currFrame = nextFrame
         ret, nextFrame = cap.read()
-    # print("Frame Number {}".format(i + 1))
+    print("Frame Number {}".format(i + 1))
 
     # Changing from 720p to 480p
     previousFrame = convert480p(previousFrame)
@@ -107,7 +112,6 @@ while (cap.isOpened()):
     # FOREGROUND EXTRACTION
     #
     #
-
     startTimeForeGroundExtraction = time.time()
 
     # Readying the frames
@@ -177,17 +181,20 @@ while (cap.isOpened()):
     if (i + 1 == 1):
         # If no candidate detected, use image centre as initial state
         if not ballCandidatesFilteredProximity:
+            predictionCount += 1
             initstate = imageCenter
         # If Candidates detected
         else:
             # If a single candidate detected, use it for the initial state
             if (len(ballCandidatesFilteredProximity) == 1):
+                detectionCount += 1
                 x = ballCandidatesFilteredProximity[0][0]
                 y = ballCandidatesFilteredProximity[0][1]
                 mp = np.array([[np.float32(x)], [np.float32(y)]])
                 initstate = [mp[0], mp[1]]
             # If multiple candidates, calculate candidate closest to the image centre for initial state
             else:
+                predictionCount += 1
                 minDistInitCand = 10000
                 for cand in ballCandidatesFilteredProximity:
                     distCenter = math.sqrt(math.pow(
@@ -212,6 +219,7 @@ while (cap.isOpened()):
 
         # If one candidate, measure and correct
         if (len(ballCandidatesFilteredProximity) == 1):
+            detectionCount += 1
             for cand in ballCandidatesFilteredProximity:
                 # distncePredAct = math.sqrt(
                 #     math.pow((cand[0] - tp[0]), 2) + math.pow((cand[1] - tp[1]), 2))
@@ -247,7 +255,8 @@ while (cap.isOpened()):
                 cv2.imshow('Candidate image', currFrame)
 
         # If multiple candidates,
-        elif(len(ballCandidatesFilteredProximity) > 1):
+        elif (len(ballCandidatesFilteredProximity) > 1):
+            predictionCount += 1
             minDistObject = 1000
             minDistXcoord = 0
             minDistYcoord = 0
@@ -296,6 +305,7 @@ while (cap.isOpened()):
                 cv2.imshow('Candidate image', currFrame)
         # If no candidate detected, predict only
         else:
+            predictionCount += 1
             cv2.circle(currFrame, (tp[0], tp[1]), 10, (0, 0, 255), -1)
             dictFrameNumberscX[i + 1] = tp[0]
             dictFrameNumberscY[i+1] = tp[1]
@@ -322,6 +332,8 @@ while (cap.isOpened()):
             (sum(trackingTime) / (endFrameDataset - startFrameDataset))+(endKalmanInitTime-startKalmanInitTime)))
         print("Average Total Process Time: {}".format(
             sum(processTime) / (endFrameDataset - startFrameDataset)))
+        print("Detection Count: {}".format(detectionCount))
+        print("Prediction Count: {}".format(predictionCount))
         keys = list(dictFrameNumberscX.keys())
         xvalues = list(dictFrameNumberscX.values())
         yvalues = list(dictFrameNumberscY.values())
@@ -361,7 +373,7 @@ while (cap.isOpened()):
 
     # Exits the loop when Esc is pressed, goes to previous frame when space pressed and goes to next frame when any other key is pressed
     if(__debug__):
-        k = cv2.waitKey(30)
+        k = cv2.waitKey(0)
         if k == 27:
             break
         elif k == 32:
