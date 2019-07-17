@@ -1,21 +1,41 @@
 Dataset,Detection Step,Precision(%),Recall(%),F1 Score(%)
-Dataset1,Contouring,26.82,96.24,41.95
+Dataset 1,Contouring,26.82,96.24,41.95
 ,Detection by size,50.87,95.02,66.26
 ,Detection by region,56.78,95.92,71.33
 ,Detection by velocity,78.16,86.37,82.06
-Dataset2,Contouring,22.62,96.7,36.66
+Dataset 2,Contouring,22.62,96.7,36.66
 ,Detection by size,42.31,99.44,59.36
 ,Detection by region,56.36,99.44,71.94
 ,Detection by velocity,84.54,94.08,89.06
-Dataset3,Contouring,17.46,88.89,29.19
+Dataset 3,Contouring,17.46,88.89,29.19
 ,Detection by size,46.67,88.89,61.21
 ,Detection by region,72.56,88.89,79.9
 ,Detection by velocity,73.07,88.37,83.52
-Dataset4,Contouring,29.19,89.03,43.97
+Dataset 4,Contouring,29.19,89.03,43.97
 ,Detection by size,69.46,90.09,78.44
 ,Detection by region,77.4,91.02,83.66
 ,Detection by velocity,91.11,87.16,89.09
-Dataset5,Contouring,22.28,76.87,34.55
+Dataset 5,Contouring,22.28,76.87,34.55
 ,Detection by size,51.11,77.77,61.68
 ,Detection by region,57.06,70.94,63.25
 ,Detection by velocity,68.75,66.89,67.81
+Dataset 6,Contouring,21.63,89.83,34.86
+,Detection by size,47.05,86.85,61.03
+,Detection by region,66.08,86.36,74.87
+,Detection by velocity,84.39,82.95,83.66
+Dataset 7,Contouring,17.19,94.78,29.1
+,Detection by size,36.36,91.86,52.1
+,Detection by region,54.7,91.86,68.57
+,Detection by velocity,85.36,84.54,84.95
+Dataset 8,Contouring,27.34,94.8,42.44
+,Detection by size,68.47,93.88,79.19
+,Detection by region,75.08,92.54,82.9
+,Detection by velocity,88.2,89.77,88.98
+Dataset 9,Contouring,24.46,93.63,38.79
+,Detection by size,53,88.99,66.43
+,Detection by region,61,89.4,72.52
+,Detection by velocity,83.33,85.64,84.47
+Dataset 10,Contouring,24.84,95.81,39.45
+,Detection by size,56.93,91.46,70.18
+,Detection by region,68.08,90.99,77.89
+,Detection by velocity,87.5,89.57,88.52

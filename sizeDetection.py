@@ -1,10 +1,10 @@
 import glob
 import time
 import cv2
-from Modules.foregroundExtractionD5 import readyFrame, frameDifferencing, morphologicalOperations, natural_sort,convert480p
+from Modules.foregroundExtraction import readyFrame, frameDifferencing, morphologicalOperations, natural_sort,convert480p
 
 startTimeReadingFrames = time.time()
-datasetName = "Dataset5"
+datasetName = "Dataset10"
 if (datasetName == "Dataset1"):
     startFrameDataset = 65
     endFrameDataset = 560
@@ -18,8 +18,26 @@ elif (datasetName == "Dataset4"):
     startFrameDataset = 1
     endFrameDataset = 330
 elif (datasetName == "Dataset5"):
+    startFrameDataset = 0
+    endFrameDataset = 150
+elif (datasetName == "Dataset6"):
     startFrameDataset = 1
-    endFrameDataset = 200
+    endFrameDataset = 180
+elif (datasetName == "Dataset7"):
+    startFrameDataset = 0
+    endFrameDataset = 220
+elif (datasetName == "Dataset8"):
+    startFrameDataset = 1
+    endFrameDataset = 240
+elif (datasetName == "Dataset9"):
+    startFrameDataset = 1
+    endFrameDataset = 246
+elif (datasetName == "Dataset10"):
+    startFrameDataset = 1
+    endFrameDataset = 233
+elif (datasetName == "Dataset11"):
+    startFrameDataset = 1
+    endFrameDataset = 220
 dictFrameNumberscX = {}
 dictFrameNumberscY = {}
 ballCandidatesPreviousFrame = list()
@@ -59,7 +77,7 @@ while (cap.isOpened()):
         previousFrameGray, currFrameGray, nextFrameGray)
 
     # Performing morphological operations
-    final_image = morphologicalOperations(threshFrameDifferencing, 6, 4)
+    final_image = morphologicalOperations(threshFrameDifferencing, 4, 4)
     # cv2.imshow('Final Image',final_image)
     endTimeForegroundExtrction=time.time()
     print("Foreground Extraction--- %s seconds ---" % (endTimeForegroundExtrction - startTimeForeGroundExtraction))
@@ -88,21 +106,24 @@ while (cap.isOpened()):
         perimeter = cv2.arcLength(cnt, True)
         cv2.drawContours(currFrame, [cnt], -1, (0, 255, 0), 2)
         cv2.putText(currFrame, str(area), (cX, cY),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
-        if area > min_PlayerArea:
-            playerCadidates.append((cX, cY, area, perimeter))
-        elif area > min_IncompletePlayerArea and area < min_PlayerArea:
-            incompletePlayerCandidates.append((cX, cY, area, perimeter))
-        elif area < max_BallArea and area > min_BallArea:
-            ballCandidates.append((cX, cY, area, perimeter))
-            cv2.drawContours(currFrame, [cnt], -1, (0, 255, 0), 1)
-            cv2.putText(currFrame, str(area), (cX, cY),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
-        elif area < min_BallArea:
-            continue
+        # if area > min_PlayerArea:
+        #     playerCadidates.append((cX, cY, area, perimeter))
+        # elif area > min_IncompletePlayerArea and area < min_PlayerArea:
+        #     incompletePlayerCandidates.append((cX, cY, area, perimeter))
+        # elif area < max_BallArea and area > min_BallArea:
+        #     ballCandidates.append((cX, cY, area, perimeter))
+        #     cv2.drawContours(currFrame, [cnt], -1, (0, 255, 0), 1)
+        #     cv2.putText(currFrame, str(area), (cX, cY),
+        #             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+        # elif area < min_BallArea:
+        #     continue
         cv2.imshow('Candidate image', currFrame)
     print("Ball Canidates: %d" % len(ballCandidates))
     print("Player Candidates: %d" % len(playerCadidates))
     print("Incomplete Player Candidate: %d" %len(incompletePlayerCandidates))
+
+    if (((i + 1) % endFrameDataset) == 0):
+        break
 
     i += 1  # increments the loop
 

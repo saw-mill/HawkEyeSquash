@@ -5,7 +5,7 @@ from Modules.foregroundExtraction import readyFrame, frameDifferencing, morpholo
 from Modules.ballDetectionRes import findContours, sizeDetection, playerProximityDetection, regionDetection, courtBoundaryDetection
 
 startTimeReadingFrames = time.time()
-datasetName = "Dataset10"
+datasetName = "Dataset2"
 if (datasetName == "Dataset1"):
     startFrameDataset = 65
     endFrameDataset = 560
@@ -31,8 +31,8 @@ elif (datasetName == "Dataset8"):
     startFrameDataset = 0
     endFrameDataset = 240
 elif (datasetName == "Dataset9"):
-    startFrameDataset = 0
-    endFrameDataset = 200
+    startFrameDataset = 1
+    endFrameDataset = 246
 elif (datasetName == "Dataset10"):
     startFrameDataset = 0
     endFrameDataset = 230
@@ -135,8 +135,8 @@ while (cap.isOpened()):
     if (len(ballCandidatesFilteredProximity) > 0):
         for cand in ballCandidatesFilteredProximity:
             cv2.drawContours(currFrame, [cand[3]], -1, (255, 0,), 2)
-            cv2.putText(currFrame, "A:"+str(
-                    cand[2])+" MD:"+str(cand[5]), (cand[0] + 1, cand[1] + 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+            # cv2.putText(currFrame, "A:"+str(
+            #         cand[2])+" MD:"+str(cand[5]), (cand[0] + 1, cand[1] + 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
             if(__debug__):
                 cv2.imshow('Candidate image', currFrame)
     else:

@@ -1,0 +1,13 @@
+Dataset,Total Frames,F1-score
+Dataset 1,560,82.06
+Dataset 2,215,89.06
+Dataset 3,140,83.52
+Dataset 4,330,89.09
+Dataset 5,210,67.81
+Dataset 6,180,83.66
+Dataset 7,220,84.95
+Dataset 8,240,88.98
+Dataset 9,245,84.47
+Dataset 10,235,88.52
+,,
+,,Average= 84.21

@@ -60,6 +60,9 @@ def courtBoundaryDetection(datasetName, ballCandidates, playerCadidates, incompl
         elif (datasetName == "Dataset5"):
                 courtBoundaryleft = 161
                 courtBoundaryRight = 695
+        elif (datasetName == "Dataset11"):
+                courtBoundaryleft = 120
+                courtBoundaryRight = 745
         ballCandidatesFilteredBoundary = list()
         playerCadidatesFilteredBoundary = list()
         incompletePlayerCandidatesFilteredBoundary = list()
@@ -156,14 +159,14 @@ def regionDetection(ballCandidatesFiltered, ballCandidatesPreviousFrame,currFram
                                 continue
                                 # cv2.putText(currFrame, "Not", (cand[0] + 1, cand[1] + 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 150, 192), 2)
                                 # cv2.imshow('Candidate image', currFrame)
-                ballCandidatesPreviousFrame = ballCandidatesFilteredProximity
+                # ballCandidatesPreviousFrame = ballCandidatesFilteredProximity
         else:
                 # for cand in ballCandidatesFiltered:
                 ballCandidatesFilteredProximity = ballCandidatesFiltered
                         # cv2.drawContours(currFrame, [cand[3]], -1, (255, 0,), 2)
                         # cv2.putText(currFrame, "Maybe", (cand[0] + 1, cand[1] + 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 150, 192), 2)
                         # cv2.imshow('Candidate image', currFrame)
-                ballCandidatesPreviousFrame = ballCandidatesFiltered
+        ballCandidatesPreviousFrame = ballCandidatesFiltered
         endTimeRegionDetection = time.time()
         print("Expected Region based filtering in--- %s seconds ---" % (endTimeRegionDetection - startTimeRegionDetection))
         print("Ball Candidates: %d" % len(ballCandidatesFilteredProximity))
